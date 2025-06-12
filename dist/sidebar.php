@@ -5,6 +5,10 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 ?>
+<?php
+$allowed_ledger = ['admin', 'accounting'];
+$show_ledger = isset($_SESSION['usertype']) && in_array($_SESSION['usertype'], $allowed_ledger);
+?>
 
 <header class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row bg-white shadow-sm px-3">
     <!-- Left side: Sidebar Toggle (for mobile) -->
@@ -14,12 +18,12 @@ if (!isset($_SESSION['user_id'])) {
         </a>
 
         <div class="d-flex align-items-start" style="margin-left: 10px;">
-            <div class="logo" style="width: 150px;">
-                <a href="index.php">
-                    <img src="assets/css/img/malindig_header.png" alt="Logo" style="width: 100%;">
-                </a>
+            <div class="logo" style="width: 220px;">
+            <a href="index.php">
+                <img src="assets/css/img/malindig_header.png" alt="Logo" style="width: 100%; max-width: 400px; min-width: 180px;">
+            </a>
             </div>
-            <!-- <span class="ms-3 fw-bold fs-5" style="white-space: nowrap;">Malindig EduPay</span> -->
+            <!-- <span class="ms-3 fw-bold fs-4" style="white-space: nowrap;">Malindig EduPay</span> -->
         </div>
     </div>
 
@@ -133,28 +137,29 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         <span>Student</span>
                     </a>
                 </li>
-
-                <li class="sidebar-item has-sub <?php
-                                                // Check if any of the submenu pages are active
-                                                $ledger_active = in_array($current_page, ['student_ledger_sidebar.php', 'student_fees_sidebar.php', 'transactions_sidebar.php']);
-                                                echo $ledger_active ? 'active' : '';
-                                                ?>">
-                    <a href="#" class='sidebar-link'>
-                        <i class="bi bi-cash"></i>
-                        <span>Student Ledger</span>
-                    </a>
-                    <ul class="submenu" style="<?php echo $ledger_active ? 'display: block;' : ''; ?>">
-                        <li class="submenu-item <?php echo ($current_page == 'student_ledger_sidebar.php') ? 'active' : ''; ?>">
-                            <a href="student_ledger_sidebar.php">Ledger List</a>
-                        </li>
-                        <li class="submenu-item <?php echo ($current_page == 'student_fees_sidebar.php') ? 'active' : ''; ?>">
-                            <a href="student_fees_sidebar.php">Fees</a>
-                        </li>
-                        <li class="submenu-item <?php echo ($current_page == 'transactions_sidebar.php') ? 'active' : ''; ?>">
-                            <a href="transactions_sidebar.php">Transactions</a>
-                        </li>
-                    </ul>
-                </li>
+                <!-- Student Ledger Sidebar -->
+                <?php if ($show_ledger): ?>
+                    <li class="sidebar-item has-sub <?php
+                                                    $ledger_active = in_array($current_page, ['student_ledger_sidebar.php', 'student_fees_sidebar.php', 'transactions_sidebar.php']);
+                                                    echo $ledger_active ? 'active' : '';
+                                                    ?>">
+                        <a href="#" class='sidebar-link'>
+                            <i class="bi bi-cash"></i>
+                            <span>Student Ledger</span>
+                        </a>
+                        <ul class="submenu" style="<?php echo $ledger_active ? 'display: block;' : ''; ?>">
+                            <li class="submenu-item <?php echo ($current_page == 'student_ledger_sidebar.php') ? 'active' : ''; ?>">
+                                <a href="student_ledger_sidebar.php">Ledger List</a>
+                            </li>
+                            <li class="submenu-item <?php echo ($current_page == 'student_fees_sidebar.php') ? 'active' : ''; ?>">
+                                <a href="student_fees_sidebar.php">Fees</a>
+                            </li>
+                            <li class="submenu-item <?php echo ($current_page == 'transactions_sidebar.php') ? 'active' : ''; ?>">
+                                <a href="transactions_sidebar.php">Transactions</a>
+                            </li>
+                        </ul>
+                    </li>
+                <?php endif; ?>
 
                 <li class="sidebar-title">Other Information</li>
 
@@ -273,21 +278,21 @@ $current_page = basename($_SERVER['PHP_SELF']);
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    const exportForm = document.querySelector('form[action="php_functions/export_students_excel.php"]');
-    if (exportForm) {
-        exportForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            Swal.fire({
-                icon: 'success',
-                title: 'Export Started',
-                text: 'Your Excel export will download shortly.',
-                timer: 1500,
-                showConfirmButton: false
-            }).then(() => {
-                exportForm.submit(); // Continue with the download
+    document.addEventListener("DOMContentLoaded", function() {
+        const exportForm = document.querySelector('form[action="php_functions/export_students_excel.php"]');
+        if (exportForm) {
+            exportForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Export Started',
+                    text: 'Your Excel export will download shortly.',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    exportForm.submit(); // Continue with the download
+                });
             });
-        });
-    }
-});
+        }
+    });
 </script>
