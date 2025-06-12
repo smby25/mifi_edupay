@@ -7,7 +7,7 @@
             <!-- Modal Header -->
             <div class="modal-header border-0">
                 <h1 class="modal-title fw-semibold d-flex align-items-center" id="addStudentModalLabel">
-                    <i class="bi bi-person-plus-fill me-2 text-success"></i> Add High School Student
+                    <i class="bi bi-person-plus-fill me-2 text-success"></i> Add Student
                 </h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -59,8 +59,8 @@
                 <h6 class="fw-semibold text-primary border-bottom pt-4 pb-2 mb-3">Contact & Address</h6>
                 <div class="row g-3">
                     <div class="col-md-8">
-                        <label class="form-label">Complete Address <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="complete_address" required>
+                        <label class="form-label">Complete Address</label>
+                        <input type="text" class="form-control" name="complete_address">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Barangay</label>
@@ -108,8 +108,8 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Section</label>
-                        <input type="text" class="form-control" name="section" placeholder="e.g., Diamond">
+                        <label class="form-label">Section <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="section" placeholder="e.g., Diamond" required>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Student Type <span class="text-danger">*</span></label>

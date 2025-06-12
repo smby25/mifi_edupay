@@ -80,8 +80,8 @@ include "../conn.php";
         <th>Student Info</th>
         <th>Payment Type</th>
         <th>Paid Date &amp; By</th>
-        <!-- <th>Amount</th> -->
-        <th>Action</th>
+        <th>Amount</th>
+        <!-- <th>Action</th> -->
     </tr>
 </thead>
 <tbody class="small-font-table">
