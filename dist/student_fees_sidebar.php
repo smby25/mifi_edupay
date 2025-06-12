@@ -92,6 +92,8 @@ include "../conn.php";
                                 id, batch_name, target_grade, payment_type, amount 
                             FROM 
                                 payments
+                            WHERE
+                                status = 'active'
                             ORDER BY 
                                 id DESC
                             LIMIT ?, ?
