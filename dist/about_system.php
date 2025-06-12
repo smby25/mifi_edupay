@@ -4,160 +4,213 @@ session_start();
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>About the System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap 5 CDN -->
+
+    <!-- Bootstrap 5 & Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
     <style>
         body {
-            background: #f8f9fa;
+            background: #f6f7fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
+        /* Blue and Gold Theme Colors */
+        :root {
+            --primary-blue: #0d47a1;
+            --secondary-gold: #ffd700;
+            --primary-blue-dark: #08306b;
+            --secondary-gold-dark: #c9a100;
+        }
+
         .hero-section {
-            background: linear-gradient(to right, #0d6efd, #6f42c1);
-            color: white;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-gold) 100%);
+            color: #fff;
             padding: 5rem 1rem;
             text-align: center;
+            position: relative;
+        }
+
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.05), #f6f7fa);
+            z-index: 1;
         }
 
         .hero-section h1 {
-            font-weight: 700;
-            font-size: 2.5rem;
+            font-weight: 800;
+            font-size: 3rem;
+            position: relative;
+            z-index: 2;
         }
 
         .hero-section p {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             max-width: 700px;
             margin: auto;
+            position: relative;
+            z-index: 2;
         }
 
         .content-section {
-            padding: 3rem 1rem;
+            padding: 4rem 1rem;
+            z-index: 2;
+            position: relative;
         }
 
         .info-card {
-            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border: 2px solid var(--secondary-gold);
             border-radius: 1rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease;
+            box-shadow: 0 10px 25px rgba(13, 71, 161, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .info-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(13, 71, 161, 0.13);
+            border-color: var(--secondary-gold-dark);
         }
 
         .info-card .card-body {
             padding: 2rem;
         }
 
-        footer {
-            text-align: center;
-            padding: 1rem;
-            font-size: 0.9rem;
-            color: #6c757d;
+        .info-card h5 {
+            font-weight: 600;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--primary-blue);
+        }
+
+        .info-card ul {
+            padding-left: 1.2rem;
         }
 
         .close-btn {
-            margin-top: 2rem;
+            margin-top: 3rem;
             text-align: center;
         }
 
         .btn-modern {
-            background: #0d6efd;
-            color: #fff;
+            background: var(--secondary-gold);
+            color: var(--primary-blue);
             border: none;
-            padding: 0.75rem 1.5rem;
+            padding: 0.75rem 2rem;
             font-size: 1rem;
             border-radius: 2rem;
-            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.10);
-            transition: background 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.18);
+            transition: all 0.3s ease;
+            font-weight: 600;
         }
 
         .btn-modern:hover {
-            background:rgb(130, 142, 184);
-            box-shadow: 0 4px 16px rgba(111, 66, 193, 0.12);
+            background: var(--secondary-gold-dark);
+            color: #fff;
+            box-shadow: 0 6px 16px rgba(255, 215, 0, 0.28);
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.9rem;
+            color: var(--primary-blue-dark);
+        }
+
+        a.dev-link {
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        a.dev-link:hover {
+            text-decoration: underline;
+            color: var(--secondary-gold-dark);
         }
     </style>
+    </style>
 </head>
-
 <body>
 
-    <section class="hero-section">
-        <div class="container">
-            <h1>About the System</h1>
-            <p>This system is designed to streamline and improve the operations of Malindig Institute Foundation Inc.</p>
+<section class="hero-section">
+    <div class="container">
+        <h1><i class="bi bi-info-circle-fill me-2"></i>About the System</h1>
+        <p>This platform streamlines operations at Malindig Institute Foundation Inc. through modern, efficient, and secure digital solutions.</p>
+    </div>
+</section>
+
+<section class="content-section container">
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card info-card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-bullseye me-2"></i>System Purpose</h5>
+                    <p>This system helps manage student records, administrative data, and transactions through a secure and intuitive interface.</p>
+                </div>
+            </div>
         </div>
-    </section>
-
-    <section class="content-section container">
-        <div class="row g-4">
-            <div class="col-md-6">
-                <div class="card info-card">
-                    <div class="card-body">
-                        <h5 class="card-title">System Purpose</h5>
-                        <p class="card-text">This system provides students, faculty, and administrators with an efficient way to manage data, track student records, and simplify administrative tasks in a secure and user-friendly platform.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-6">
-                <div class="card info-card">
-                    <div class="card-body">
-                        <h5 class="card-title">Technologies Used</h5>
-                        <p class="card-text">Built with PHP, MySQL, and Bootstrap 5, the system is optimized for performance, security, and scalability.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="card info-card">
-                    <div class="card-body">
-                        <h5 class="card-title">System Features</h5>
-                        <ul class="mb-0">
-                            <li>Student Information Management</li>
-                            <li>Student Payment Management</li>
-                            <li>Student Ledger</li>
-                            <li>Transactions</li>
-                            <li>Reports and Analytics</li>
-                            <li>Responsive Interface</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="card info-card">
-                    <div class="card-body">
-                        <h5 class="card-title">Developer Information</h5>
-                        <p class="card-text">
-                            This system was developed by 
-                            <strong>
-                                <a href="https://smby25.github.io/MyPortfolioV1/" target="_blank" style="color: inherit; text-decoration: underline;">
-                                    Sonny Louise P. Rogelio
-                                </a>
-                            </strong>, founder of <strong>Development Execute (DevExecute)</strong>, a tech-driven group dedicated to developing software and websites for schools and communities.
-                        </p>
-                    </div>
+        
+        <div class="col-md-6">
+            <div class="card info-card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-code-slash me-2"></i>Technologies Used</h5>
+                    <p>Developed using <strong>PHP</strong>, <strong>MySQL</strong>, and <strong>Bootstrap 5</strong> for responsive, scalable, and high-performance execution.</p>
                 </div>
             </div>
         </div>
 
-        <!-- Close Button -->
-        <div class="close-btn">
-            <a href="index.php" class="btn btn-modern">Close</a>
+        <div class="col-md-6">
+            <div class="card info-card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-ui-checks-grid me-2"></i>System Features</h5>
+                    <ul>
+                        <li>Student Information Management</li>
+                        <li>Payment and Ledger Monitoring</li>
+                        <li>Transactions History</li>
+                        <li>Reports & Data Analytics</li>
+                        <li>Modern Responsive Design</li>
+                    </ul>
+                </div>
+            </div>
         </div>
-    </section>
 
-    <footer>
-        &copy; <?= date("Y") ?> Development Execute. All rights reserved.
-    </footer>
+        <div class="col-md-6">
+            <div class="card info-card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-person-badge me-2"></i>Developer</h5>
+                    <p>
+                        Created by 
+                        <strong>
+                            <a href="https://smby25.github.io/MyPortfolioV1/" target="_blank" class="dev-link">
+                                Sonny Louise P. Rogelio
+                            </a>
+                        </strong>, founder of <strong>DevExecute</strong> — a group that builds tech solutions for schools and communities.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Close Button -->
+    <div class="close-btn">
+        <a href="index.php" class="btn btn-modern"><i class="bi bi-arrow-left"></i> Back to Home</a>
+    </div>
+</section>
+
+<footer>
+    &copy; <?= date("Y") ?> Development Execute. All rights reserved.
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
