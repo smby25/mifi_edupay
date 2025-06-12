@@ -206,7 +206,7 @@ while ($row = $res->fetch_assoc()) {
             <footer>
                 <div class="footer clearfix mb-0 text-muted">
                     <div class="float-start">
-                        <p>2025 &copy; Development Execute</p>
+                        <p>2025 &copy; EduPay</p>
                     </div>
                     <div class="float-end">
                         <p>Developed by <a
