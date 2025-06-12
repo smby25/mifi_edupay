@@ -60,6 +60,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $student_id
             );
         } else {
+            // Check for duplicate
+            $dup_stmt = $conn->prepare("SELECT student_id FROM students WHERE fname=? AND mname=? AND lname=? AND lrn=?");
+            $dup_stmt->bind_param("ssss", $fname, $mname, $lname, $lrn);
+            $dup_stmt->execute();
+            $dup_stmt->store_result();
+            if ($dup_stmt->num_rows > 0) {
+                // Duplicate found, redirect with error
+                header("Location: ../student_sidebar.php?duplicate=1");
+                exit();
+            }
+            $dup_stmt->close();
+
             // INSERT new record
             $stmt = $conn->prepare("INSERT INTO students (
                 fname, mname, lname, suffix, dbirth, sex,
