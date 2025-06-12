@@ -84,11 +84,15 @@ while ($row = $res->fetch_assoc()) {
     <link rel="icon" type="image/png" href="assets/css/img/malindig_logo.png">
 
     <!-- <style>
-        body,
-        html {
-            font-family: Arial, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-        }
+body {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 400;
+    background-color: #f4f6f9;
+    color: #333;
+}
     </style> -->
+
+    
 </head>
 
 

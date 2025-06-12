@@ -19,9 +19,9 @@ $show_ledger = isset($_SESSION['usertype']) && in_array($_SESSION['usertype'], $
 
         <div class="d-flex align-items-start" style="margin-left: 10px;">
             <div class="logo" style="width: 220px;">
-            <a href="index.php">
-                <img src="assets/css/img/malindig_header.png" alt="Logo" style="width: 100%; max-width: 400px; min-width: 180px;">
-            </a>
+                <a href="index.php">
+                    <img src="assets/css/img/malindig_header.png" alt="Logo" style="width: 100%; max-width: 400px; min-width: 180px;">
+                </a>
             </div>
             <!-- <span class="ms-3 fw-bold fs-4" style="white-space: nowrap;">Malindig EduPay</span> -->
         </div>
@@ -36,10 +36,8 @@ $show_ledger = isset($_SESSION['usertype']) && in_array($_SESSION['usertype'], $
 
         <!-- Notification Button -->
         <div class="position-relative dropdown">
-            <button class="btn btn-light border-0 p-2 rounded-circle shadow-xl position-relative" id="notificationButton" data-bs-toggle="dropdown" aria-expanded="false" style="width: 40px; height: 40px;">
+            <button id="notificationButton" class="btn btn-light border-0 p-2 rounded-circle shadow-xl position-relative" style="width: 40px; height: 40px;">
                 <i class="bi bi-bell fs-5"></i>
-
-
             </button>
 
             <!-- Dropdown Menu -->
@@ -76,7 +74,10 @@ $show_ledger = isset($_SESSION['usertype']) && in_array($_SESSION['usertype'], $
                     </span>
                 </li>
                 <li>
-                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="profile.php">
+                    <a class="dropdown-item d-flex align-items-center gap-2 py-2"
+                        href="#"
+                        data-bs-toggle="modal"
+                        data-bs-target="#comingSoonModal">
                         <i class="bi bi-person-circle text-primary"></i> Profile
                     </a>
                 </li>
@@ -254,6 +255,53 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Profile "Coming Soon" SweetAlert
+        const profileLinks = document.querySelectorAll('a[data-bs-target="#comingSoonModal"]');
+        profileLinks.forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Coming Soon!',
+                    text: 'This feature is coming soon!',
+                    confirmButtonColor: '#3085d6'
+                });
+            });
+        });
+
+        // Dark Mode "Coming Soon" SweetAlert
+        const darkModeBtn = document.getElementById('darkModeToggle');
+        if (darkModeBtn) {
+            darkModeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Coming Soon!',
+                    text: 'Dark mode feature is coming soon!',
+                    confirmButtonColor: '#3085d6'
+                });
+            });
+        }
+
+        // Notification "Coming Soon" SweetAlert
+        const notificationBtn = document.getElementById('notificationButton');
+        if (notificationBtn) {
+            notificationBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Coming Soon!',
+                    text: 'Notification feature is coming soon!',
+                    confirmButtonColor: '#3085d6'
+                });
+            });
+        }
+    });
+</script>
 
 <script>
     // Open settings modal when clicking Settings in profile dropdown
