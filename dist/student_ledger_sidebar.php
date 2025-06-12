@@ -67,6 +67,13 @@ include "../conn.php";
                 </div>
             </div>
 
+            <!-- Filter Dropdown -->
+            <div class="mb-2">
+                <label for="gradeSectionStrandFilter" class="form-label">Filter by Grade &amp; Section / Strand</label>
+                <select id="gradeSectionStrandFilter" class="form-select" style="width:auto;display:inline-block;">
+                    <option value="">All</option>
+                </select>
+            </div>
             <!-- Datatable -->
             <div class="table-responsive">
                 <section class="section">
@@ -78,8 +85,7 @@ include "../conn.php";
                                         <tr>
                                             <th style="display:none;">Student ID</th>
                                             <th>Full Name</th>
-                                            <th>Grade</th>
-                                            <th>Section</th>
+                                            <th>Grade &amp; Section / Strand</th>
                                             <th>Remaining Balance</th>
                                             <th>Action</th>
                                         </tr>
@@ -90,7 +96,7 @@ include "../conn.php";
                                         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
                                         $offset = ($page - 1) * $limit;
 
-                                        $query = "SELECT SQL_CALC_FOUND_ROWS student_id, fname, mname, lname, grade_level, section FROM students LIMIT ?, ?";
+                                        $query = "SELECT SQL_CALC_FOUND_ROWS student_id, fname, mname, lname, grade_level, section, strand FROM students LIMIT ?, ?";
                                         $stmt = $conn->prepare($query);
                                         $stmt->bind_param("ii", $offset, $limit);
                                         $stmt->execute();
@@ -101,22 +107,32 @@ include "../conn.php";
                                             $full_name = $row['lname'] . ', ' . $row['fname'] . ' ' . strtoupper(substr($row['mname'], 0, 1)) . '.';
                                             $grade = $row['grade_level'];
                                             $section = $row['section'];
+                                            $strand = $row['strand'] ?? '';
+
+                                            // Combine Grade, Section, Strand
+                                            $grade_section_strand = "Grade " . htmlspecialchars($grade);
+                                            if (!empty($section)) {
+                                                $grade_section_strand .= " - " . htmlspecialchars($section);
+                                            }
+                                            if (!empty($strand)) {
+                                                $grade_section_strand .= " | " . htmlspecialchars($strand);
+                                            }
 
                                             // Get remaining balance (total fees - payments)
                                             $balance_query = "
-                                                                SELECT 
-                                                                    IFNULL((
-                                                                        SELECT SUM(p.amount)
-                                                                        FROM payments p
-                                                                        WHERE p.target_grade = ?
-                                                                    ), 0) 
-                                                                    - 
-                                                                    IFNULL((
-                                                                        SELECT SUM(sp.amount_paid)
-                                                                        FROM student_payments sp
-                                                                        WHERE sp.student_id = ?
-                                                                    ), 0) AS balance
-                                                            ";
+                                                SELECT 
+                                                    IFNULL((
+                                                        SELECT SUM(p.amount)
+                                                        FROM payments p
+                                                        WHERE p.target_grade = ?
+                                                    ), 0) 
+                                                    - 
+                                                    IFNULL((
+                                                        SELECT SUM(sp.amount_paid)
+                                                        FROM student_payments sp
+                                                        WHERE sp.student_id = ?
+                                                    ), 0) AS balance
+                                            ";
                                             $bal_stmt = $conn->prepare($balance_query);
                                             $bal_stmt->bind_param("si", $grade, $student_id);
                                             $bal_stmt->execute();
@@ -127,8 +143,7 @@ include "../conn.php";
                                             echo "<tr>";
                                             echo "<td style='display:none;'>" . htmlspecialchars($student_id) . "</td>";
                                             echo "<td>" . htmlspecialchars($full_name) . "</td>";
-                                            echo "<td>" . htmlspecialchars($grade) . "</td>";
-                                            echo "<td>" . htmlspecialchars($section) . "</td>";
+                                            echo "<td>" . $grade_section_strand . "</td>";
                                             echo "<td>₱" . number_format($balance, 2) . "</td>";
                                             echo "<td>
                                                     <button type='button' class='btn btn-primary btn-sm view-student-btn' 
@@ -139,7 +154,6 @@ include "../conn.php";
                                                         data-balance='" . number_format($balance, 2) . "'>
                                                         <i class='bi bi-eye'></i> View
                                                     </button>
-
                                                 </td>";
                                             echo "</tr>";
                                         }
@@ -148,11 +162,7 @@ include "../conn.php";
                                         $totalRows = $resultTotal->fetch_assoc()['total'];
                                         $totalPages = ceil($totalRows / $limit);
                                         ?>
-
-
                                     </tbody>
-
-
                                 </table>
                             </div>
                             <!-- Pagination -->
@@ -178,16 +188,29 @@ include "../conn.php";
                 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
                 <script>
                     $(document).ready(function() {
-                        if (!$.fn.DataTable.isDataTable('#table1')) {
-                            $('#table1').DataTable({
-                                "paging": false,
-                                "searching": true,
-                                "ordering": true,
-                                "info": false,
-                                "responsive": true,
-                                "autoWidth": false
-                            });
-                        }
+                        var table = $('#table1').DataTable({
+                            "paging": false,
+                            "searching": true,
+                            "ordering": true,
+                            "info": false,
+                            "responsive": true,
+                            "autoWidth": false
+                        });
+
+                        // Populate the dropdown with unique values from the Grade/Section/Strand column (index 2)
+                        var uniqueValues = {};
+                        table.column(2).data().each(function(d) {
+                            uniqueValues[d] = true;
+                        });
+                        $.each(Object.keys(uniqueValues).sort(), function(i, v) {
+                            $('#gradeSectionStrandFilter').append('<option value="' + v + '">' + v + '</option>');
+                        });
+
+                        // Filter table when dropdown changes
+                        $('#gradeSectionStrandFilter').on('change', function() {
+                            var val = $(this).val();
+                            table.column(2).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
+                        });
                     });
                 </script>
 
