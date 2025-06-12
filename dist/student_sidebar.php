@@ -66,6 +66,14 @@ include "../conn.php";
                 </div>
             </div>
 
+            <!-- Filter Dropdown -->
+            <div class="mb-2">
+                <!-- <label for="gradeSectionStrandFilter" class="form-label">Filter by Grade &amp; Section / Strand</label> -->
+                <select id="gradeSectionStrandFilter" class="form-select" style="width:auto;display:inline-block;">
+                    <option value="">All</option>
+                </select>
+            </div>
+
             <!-- Datatable -->
             <div class="table-responsive">
                 <section class="section">
@@ -79,9 +87,7 @@ include "../conn.php";
                                             <th style="display:none;">Student ID</th>
                                             <th>Name</th>
                                             <th>LRN</th>
-                                            <th>Grade</th>
-                                            <th>Section</th>
-                                            <th>Strand</th>
+                                            <th>Grade &amp; Section / Strand</th>
                                             <th style="display:none;">Status</th>
                                             <th>Action</th>
                                         </tr>
@@ -101,14 +107,16 @@ include "../conn.php";
 
                                         while ($row = $result->fetch_assoc()) {
                                             $full_name = $row['lname'] . ', ' . $row['fname'] . ' ' . strtoupper(substr($row['mname'], 0, 1)) . '.';
+                                            $grade_section_strand = htmlspecialchars($row['grade_level']) . ' - ' . htmlspecialchars($row['section']);
+                                            if (!empty($row['strand'])) {
+                                                $grade_section_strand .= ' / ' . htmlspecialchars($row['strand']);
+                                            }
                                             echo "<tr>";
                                             echo "<td style='display:none;'>" . htmlspecialchars($row['student_id']) . "</td>"; // old hidden ID
                                             echo "<td style='display:none;'>" . htmlspecialchars($row['student_id']) . "</td>"; // new hidden Student ID column
                                             echo "<td>" . htmlspecialchars($full_name) . "</td>";
                                             echo "<td>" . htmlspecialchars($row['lrn']) . "</td>";
-                                            echo "<td>" . htmlspecialchars($row['grade_level']) . "</td>";
-                                            echo "<td>" . htmlspecialchars($row['section']) . "</td>";
-                                            echo "<td>" . htmlspecialchars($row['strand']) . "</td>";
+                                            echo "<td>" . $grade_section_strand . "</td>";
                                             echo "<td style='display:none;'>" . htmlspecialchars($row['status']) . "</td>";
                                             echo "<td>
                                     <button type='button' class='btn btn-primary btn-sm view-student-btn' data-id='" . htmlspecialchars($row['student_id']) . "'>
@@ -156,13 +164,28 @@ include "../conn.php";
                 <script>
                     $(document).ready(function() {
                         if (!$.fn.DataTable.isDataTable('#table1')) {
-                            $('#table1').DataTable({
+                            var table = $('#table1').DataTable({
                                 "paging": false,
                                 "searching": true,
                                 "ordering": true,
                                 "info": false,
                                 "responsive": true,
                                 "autoWidth": false
+                            });
+
+                            // Populate the dropdown with unique values from the Grade/Section/Strand column (index 2)
+                            var uniqueValues = {};
+                            table.column(4).data().each(function(d) {
+                                uniqueValues[d] = true;
+                            });
+                            $.each(Object.keys(uniqueValues).sort(), function(i, v) {
+                                $('#gradeSectionStrandFilter').append('<option value="' + v + '">' + v + '</option>');
+                            });
+
+                            // Filter table when dropdown changes
+                            $('#gradeSectionStrandFilter').on('change', function() {
+                                var val = $(this).val();
+                                table.column(2).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
                             });
                         }
                     });
@@ -316,74 +339,76 @@ include "../conn.php";
             });
         });
     </script>
-<?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: 'Student record has been successfully saved!',
-                confirmButtonColor: '#3085d6'
-            }).then(() => {
-                // Remove ?success=1 from the URL without reloading the page
-                if (window.history.replaceState) {
-                    const url = new URL(window.location);
-                    url.searchParams.delete('success');
-                    window.history.replaceState({}, document.title, url.pathname + url.search);
-                }
+    <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Student record has been successfully saved!',
+                    confirmButtonColor: '#3085d6'
+                }).then(() => {
+                    // Remove ?success=1 from the URL without reloading the page
+                    if (window.history.replaceState) {
+                        const url = new URL(window.location);
+                        url.searchParams.delete('success');
+                        window.history.replaceState({}, document.title, url.pathname + url.search);
+                    }
+                });
             });
-        });
-    </script>
-<?php endif; ?>
+        </script>
+    <?php endif; ?>
 
     <script>
-$(document).ready(function() {
-    // Existing view-student-btn code...
+        $(document).ready(function() {
+            // Existing view-student-btn code...
 
-    // Delete button handler
-    $('.delete-student-btn').on('click', function() {
-        var studentId = $(this).data('id');
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "This will move the student record to archive.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, archive it!',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // AJAX request to delete
-                $.ajax({
-                    url: 'php_functions/delete_student.php',
-                    type: 'POST',
-                    data: { student_id: studentId },
-                    success: function(response) {
-                        // Optionally, check response for success
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Deleted!',
-                            text: 'Student record has been deleted.',
-                            confirmButtonColor: '#3085d6'
-                        }).then(() => {
-                            location.reload(); // Refresh page or remove row from table
-                        });
-                    },
-                    error: function() {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: 'Failed to delete student record.',
-                            confirmButtonColor: '#3085d6'
+            // Delete button handler
+            $('.delete-student-btn').on('click', function() {
+                var studentId = $(this).data('id');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "This will move the student record to archive.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, archive it!',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // AJAX request to delete
+                        $.ajax({
+                            url: 'php_functions/delete_student.php',
+                            type: 'POST',
+                            data: {
+                                student_id: studentId
+                            },
+                            success: function(response) {
+                                // Optionally, check response for success
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Deleted!',
+                                    text: 'Student record has been deleted.',
+                                    confirmButtonColor: '#3085d6'
+                                }).then(() => {
+                                    location.reload(); // Refresh page or remove row from table
+                                });
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
+                                    text: 'Failed to delete student record.',
+                                    confirmButtonColor: '#3085d6'
+                                });
+                            }
                         });
                     }
                 });
-            }
+            });
         });
-    });
-});
-</script>
+    </script>
 
 </body>
 
