@@ -112,7 +112,13 @@ include "../conn.php";
                                             echo "<td>" . htmlspecialchars($row['payment_type']) . "</td>";
                                             echo "<td>₱" . number_format($row['amount'], 2) . "</td>";
                                             echo "<td>
-                                <button type='button' class='btn btn-warning btn-sm edit-payment-btn' data-id='" . htmlspecialchars($row['id']) . "'>
+                                <button type='button' 
+                                    class='btn btn-warning btn-sm edit-payment-btn' 
+                                    data-id='" . htmlspecialchars($row['id']) . "'
+                                    data-batch_name='" . htmlspecialchars($row['batch_name']) . "'
+                                    data-target_grade='" . htmlspecialchars($row['target_grade']) . "'
+                                    data-payment_type='" . htmlspecialchars($row['payment_type']) . "'
+                                    data-amount='" . htmlspecialchars($row['amount']) . "'>
                                     <i class='bi bi-pencil-square'></i>
                                 </button>
                                 <button type='button' class='btn btn-danger btn-sm delete-payment-btn ms-1' data-id='" . htmlspecialchars($row['id']) . "'>
@@ -385,6 +391,68 @@ include "../conn.php";
                         });
                     }
                 });
+            });
+        });
+    </script>
+
+    <!-- Update Fees -->
+    <script>
+        $(document).ready(function() {
+            $('.edit-payment-btn').on('click', function() {
+                // Get data from button
+                var id = $(this).data('id');
+                var batchName = $(this).data('batch_name');
+                var targetGrade = $(this).data('target_grade');
+                var paymentType = $(this).data('payment_type');
+                var amount = $(this).data('amount');
+
+                // Set modal fields
+                $('#batchName').val(batchName);
+                $('#targetGrade').val(targetGrade);
+
+                // Remove all payment rows except the first
+                $('#payment-list').html('');
+                // Add the payment row with values
+                $('#payment-list').append(`
+                    <div class="row mb-2 payment-item">
+                    <div class="col-md-6">
+                        <input type="text" name="payment_type[]" class="form-control" placeholder="Payment Type (e.g. Tuition)" required value="${paymentType}">
+                    </div>
+                    <div class="col-md-4">
+                        <input type="number" name="amount[]" class="form-control" placeholder="Amount" step="0.01" required value="${amount}">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-danger w-100 remove-payment-btn" onclick="removePaymentRow(this)">Remove</button>
+                    </div>
+                    </div>
+                `);
+
+                // Optionally, set a hidden input for ID if you want to update
+                if ($('#editPaymentId').length === 0) {
+                    $('<input>').attr({
+                        type: 'hidden',
+                        id: 'editPaymentId',
+                        name: 'payment_id'
+                    }).appendTo('#addFeesModal form');
+                }
+                $('#editPaymentId').val(id);
+
+                // Hide add and remove buttons
+                $('#addPaymentTypeBtn').hide();
+                $('.remove-payment-btn').hide();
+
+                // Set hidden input for ID
+                $('#editPaymentId').val(id);
+
+                // Open the modal
+                $('#addFeesModal').modal('show');
+            });
+
+            // When modal is closed, show the buttons again for add mode
+            $('#addFeesModal').on('hidden.bs.modal', function() {
+                $('#addPaymentTypeBtn').show();
+                $('.remove-payment-btn').show();
+                $('#editPaymentId').val('');
             });
         });
     </script>

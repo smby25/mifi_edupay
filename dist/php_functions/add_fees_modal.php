@@ -6,7 +6,7 @@
           <h5 class="modal-title" id="addFeesModalLabel">Add Payment Batch</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-
+<input type="hidden" id="editPaymentId" name="payment_id" value="">
         <div class="modal-body">
           <div class="mb-3">
             <label for="batchName" class="form-label">Batch Name</label>
@@ -35,13 +35,13 @@
                 <input type="number" name="amount[]" class="form-control" placeholder="Amount" step="0.01" required>
               </div>
               <div class="col-md-2">
-                <button type="button" class="btn btn-danger w-100" onclick="removePaymentRow(this)">Remove</button>
+                <button type="button" class="btn btn-danger w-100 remove-payment-btn" onclick="removePaymentRow(this)">Remove</button>
               </div>
             </div>
           </div>
 
           <div class="text-end">
-            <button type="button" class="btn btn-secondary" onclick="addPaymentRow()">+ Add Payment Type</button>
+            <button type="button" class="btn btn-secondary" id="addPaymentTypeBtn" onclick="addPaymentRow()">+ Add Payment Type</button>
           </div>
         </div>
 
@@ -77,3 +77,5 @@ function removePaymentRow(button) {
   row.remove();
 }
 </script>
+
+
