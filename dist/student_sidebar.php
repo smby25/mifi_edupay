@@ -317,33 +317,33 @@ include "../conn.php";
         });
     </script>
 
-<!-- Strand Required -->
+    <!-- Strand Required -->
     <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const gradeLevelSelect = document.getElementById("gradeLevelSelect");
-        const strandWrapper = document.getElementById("strandWrapper");
-        const strandSelect = strandWrapper.querySelector('select[name="strand"]');
+        document.addEventListener("DOMContentLoaded", function() {
+            const gradeLevelSelect = document.getElementById("gradeLevelSelect");
+            const strandWrapper = document.getElementById("strandWrapper");
+            const strandSelect = strandWrapper.querySelector('select[name="strand"]');
 
-        gradeLevelSelect.addEventListener("change", function() {
-            const selectedGrade = this.value;
-            if (selectedGrade === "11" || selectedGrade === "12") {
-                strandWrapper.classList.remove("d-none");
-                strandSelect.setAttribute("required", "required");
-                // Show modal alert
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Strand Required',
-                    text: 'Please select a strand for Grade 11 or 12 students.',
-                    confirmButtonColor: '#3085d6'
-                });
-            } else {
-                strandWrapper.classList.add("d-none");
-                strandSelect.removeAttribute("required");
-                strandSelect.value = "";
-            }
+            gradeLevelSelect.addEventListener("change", function() {
+                const selectedGrade = this.value;
+                if (selectedGrade === "11" || selectedGrade === "12") {
+                    strandWrapper.classList.remove("d-none");
+                    strandSelect.setAttribute("required", "required");
+                    // Show modal alert
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Strand Required',
+                        text: 'Please select a strand for Grade 11 or 12 students.',
+                        confirmButtonColor: '#3085d6'
+                    });
+                } else {
+                    strandWrapper.classList.add("d-none");
+                    strandSelect.removeAttribute("required");
+                    strandSelect.value = "";
+                }
+            });
         });
-    });
-</script>
+    </script>
 
     <script>
         $(document).ready(function() {
@@ -437,6 +437,23 @@ include "../conn.php";
             });
         });
     </script>
+
+<!-- Duplicate student Modal -->
+<?php if (isset($_GET['duplicate']) && $_GET['duplicate'] == 1): ?>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            icon: 'error',
+            title: 'Duplicate Student',
+            text: 'A student with the same name and LRN already exists.',
+            confirmButtonColor: '#3085d6'
+        });
+        // Automatically open the Add Student modal
+        $('#addStudentModal').modal('show');
+    });
+</script>
+<?php endif; ?>
+
 
 </body>
 
