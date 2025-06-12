@@ -345,12 +345,12 @@ $(document).ready(function() {
         var studentId = $(this).data('id');
         Swal.fire({
             title: 'Are you sure?',
-            text: "This will permanently delete the student record.",
+            text: "This will move the student record to archive.",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, delete it!',
+            confirmButtonText: 'Yes, archive it!',
             reverseButtons: true
         }).then((result) => {
             if (result.isConfirmed) {
