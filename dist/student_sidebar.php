@@ -317,6 +317,34 @@ include "../conn.php";
         });
     </script>
 
+<!-- Strand Required -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const gradeLevelSelect = document.getElementById("gradeLevelSelect");
+        const strandWrapper = document.getElementById("strandWrapper");
+        const strandSelect = strandWrapper.querySelector('select[name="strand"]');
+
+        gradeLevelSelect.addEventListener("change", function() {
+            const selectedGrade = this.value;
+            if (selectedGrade === "11" || selectedGrade === "12") {
+                strandWrapper.classList.remove("d-none");
+                strandSelect.setAttribute("required", "required");
+                // Show modal alert
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Strand Required',
+                    text: 'Please select a strand for Grade 11 or 12 students.',
+                    confirmButtonColor: '#3085d6'
+                });
+            } else {
+                strandWrapper.classList.add("d-none");
+                strandSelect.removeAttribute("required");
+                strandSelect.value = "";
+            }
+        });
+    });
+</script>
+
     <script>
         $(document).ready(function() {
             $('.view-student-btn').on('click', function() {
