@@ -250,20 +250,7 @@ include "../conn.php";
                 </div>
             </footer>
 
-            <!-- Success Modal
-            <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header bg-success text-white">
-                            <h5 class="modal-title" id="successModalLabel">Success</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            Student record has been successfully saved!
-                        </div>
-                    </div>
-                </div>
-            </div> -->
+
         </div>
     </div>
     <script src="assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
@@ -361,6 +348,82 @@ include "../conn.php";
             });
         });
     </script>
+
+    <!-- Delete Fees -->
+    <script>
+        $(document).ready(function() {
+            $('.delete-payment-btn').on('click', function() {
+                var paymentId = $(this).data('id');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "This will move the payment batch to the archive.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, archive!',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: 'php_functions/delete_fees.php',
+                            type: 'POST',
+                            data: {
+                                id: paymentId
+                            },
+                            success: function(response) {
+                                if (response.trim() === 'success') {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Updated!',
+                                        text: 'Payment batch to archive.',
+                                        confirmButtonColor: '#3085d6'
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error!',
+                                        text: 'Failed to update payment status.',
+                                        confirmButtonColor: '#3085d6'
+                                    });
+                                }
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
+                                    text: 'Failed to update payment status.',
+                                    confirmButtonColor: '#3085d6'
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
+    <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Payment batch has been saved successfully.',
+                    confirmButtonColor: '#3085d6'
+                }).then(() => {
+                    // Remove ?success=1 from the URL without reloading the page
+                    if (window.history.replaceState) {
+                        const url = new URL(window.location);
+                        url.searchParams.delete('success');
+                        window.history.replaceState({}, document.title, url.pathname + url.search);
+                    }
+                });
+            });
+        </script>
+    <?php endif; ?>
 
 </body>
 
