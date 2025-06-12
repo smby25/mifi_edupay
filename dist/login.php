@@ -46,21 +46,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             height: 100%;
             margin: 0;
             padding: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         body {
-            background: url('assets/images/bg/background.jpg') no-repeat center center fixed;
-            background-size: cover;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+            background: linear-gradient(135deg, #002855, #ffd700);
         }
+        .bg-3d {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100vw; height: 100vh;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .sphere {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.35;
+            filter: blur(2px);
+            animation: float 8s infinite ease-in-out alternate;
+        }
+        .sphere1 {
+            width: 350px; height: 350px;
+            background: radial-gradient(circle at 30% 30%, #ffd700 70%, #002855 100%);
+            left: -120px; top: -80px;
+            animation-delay: 0s;
+        }
+        .sphere2 {
+            width: 220px; height: 220px;
+            background: radial-gradient(circle at 70% 70%, #002855 60%, #ffd700 100%);
+            right: -80px; bottom: -60px;
+            animation-delay: 2s;
+        }
+        .sphere3 {
+            width: 120px; height: 120px;
+            background: radial-gradient(circle at 50% 50%, #fff 40%, #002855 100%);
+            left: 60vw; top: 70vh;
+            opacity: 0.2;
+            animation-delay: 1s;
+        }
+        @keyframes float {
+            0% { transform: translateY(0) scale(1);}
+            100% { transform: translateY(-40px) scale(1.08);}
+        }
+
         .login-card {
-            background: rgba(255, 255, 255, 0.96);
+            position: relative;
+            z-index: 2;
+            background: #ffffffee;
             padding: 2.5rem 2rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
-            max-width: 400px;
+            border-radius: 1.75rem;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+            max-width: 420px;
             width: 100%;
             text-align: center;
         }
@@ -69,36 +112,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             height: 70px;
             object-fit: contain;
             margin-bottom: 1rem;
+            filter: drop-shadow(0 3px 10px #00285544);
         }
         .brand-text {
-            color: #0d6efd;
+            color: #002855;
             font-weight: bold;
             font-size: 1.1rem;
         }
         .subtext {
             font-size: 0.8rem;
             color: #6c757d;
-            margin-bottom: 1.2rem;
+            margin-bottom: 1.5rem;
         }
         .form-floating .form-control {
-            border-radius: 0.6rem;
-            background: #f1f3f5;
+            border-radius: 0.75rem;
+            background: #f8f9fa;
             border: 1px solid #ced4da;
         }
         .form-floating .form-control:focus {
             background: #fff;
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.2);
+            border-color: #ffd700;
+            box-shadow: 0 0 0 0.18rem rgba(255, 215, 0, 0.35);
         }
         .btn-primary {
-            background: linear-gradient(to right, #0d6efd, #6f42c1);
+            background: linear-gradient(45deg, #002855, #ffd700);
+            color: white;
             border: none;
             border-radius: 2rem;
             font-weight: 600;
             font-size: 1rem;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
         }
         .btn-primary:hover {
-            background: linear-gradient(to right, #0b5ed7, #5936a9);
+            background: linear-gradient(45deg, #001c3d, #e6c200);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
         }
         .alert {
             font-size: 0.9rem;
@@ -110,19 +158,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 margin: 1rem;
                 padding: 2rem 1.2rem;
             }
+            .sphere1, .sphere2, .sphere3 {
+                display: none;
+            }
         }
     </style>
 </head>
 
 <body>
+    <div class="bg-3d">
+        <div class="sphere sphere1"></div>
+        <div class="sphere sphere2"></div>
+        <div class="sphere sphere3"></div>
+    </div>
     <div class="login-card shadow-lg">
         <img src="assets/images/logo/malindig_logo.png" class="school-logo" alt="School Logo">
-        <div class="brand-text" style="font-size: 0.95rem;">MALINDIG INSTITUTE FOUNDATION INC.</div>
-        <div class="subtext">The First and Only DE LA SALLE Consultancy School in the Entire Province of Marinduque — Since 1922</div>
-        <!-- <h5 class="mb-3">Welcome to School Portal</h5> -->
+        <div class="brand-text">MALINDIG INSTITUTE FOUNDATION INC.</div>
+        <div class="subtext">The First and Only DE LA SALLE Consultancy School in Marinduque — Since 1922</div>
         <p class="text-muted mb-4">Sign in to continue</p>
 
-        <?php if ($error): ?>
+        <?php if (isset($error) && $error): ?>
             <div class="alert alert-danger" role="alert">
                 <?= htmlspecialchars($error) ?>
             </div>
