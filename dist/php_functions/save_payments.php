@@ -27,8 +27,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: ../student_fees_sidebar.php?success=1");
         exit();
     } else {
-        // Insert new payment batch
-        $stmt = $conn->prepare("INSERT INTO payments (batch_name, target_grade, payment_type, amount) VALUES (?, ?, ?, ?)");
+        // Insert new payment batch with status 'active'
+        $stmt = $conn->prepare("INSERT INTO payments (batch_name, target_grade, payment_type, amount, status) VALUES (?, ?, ?, ?, 'active')");
         for ($i = 0; $i < count($payment_types); $i++) {
             $type = htmlspecialchars(trim($payment_types[$i]));
             $amt = floatval($amounts[$i]);
@@ -43,3 +43,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
+
+<!-- <script>
+function addPaymentRow() {
+  const container = document.getElementById('payment-list');
+  const row = document.createElement('div');
+  row.classList.add('row', 'mb-2', 'payment-item');
+  row.innerHTML = `
+    <div class="col-md-6">
+      <input type="text" name="payment_type[]" class="form-control" placeholder="Payment Type (e.g. Misc.)" required>
+    </div>
+    <div class="col-md-4">
+      <input type="number" name="amount[]" class="form-control" placeholder="Amount" step="0.01" required>
+    </div>
+    <div class="col-md-2">
+      <button type="button" class="btn btn-danger w-100 remove-payment-btn" onclick="removePaymentRow(this)">Remove</button>
+    </div>
+  `;
+  container.appendChild(row);
+}
+
+function removePaymentRow(button) {
+  const row = button.closest('.payment-item');
+  row.remove();
+}
+
+// SweetAlert confirmation for Save Payments
+document.addEventListener('DOMContentLoaded', function() {
+  const saveBtn = document.getElementById('savePaymentsBtn');
+  if (saveBtn) {
+    saveBtn.addEventListener('click', function(e) {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to save these payment details?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, save it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Submit the form
+          saveBtn.closest('form').submit();
+        }
+      });
+    });
+  }
+});
+</script> -->

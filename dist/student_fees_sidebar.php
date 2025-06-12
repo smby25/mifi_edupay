@@ -273,34 +273,7 @@ include "../conn.php";
     <script src="assets/js/pages/dashboard.js"></script>
 
     <script src="assets/js/main.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const ctx = document.getElementById('incomeChart').getContext('2d');
-        const incomeChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['0', '1', '2', '3', '4', '5'],
-                datasets: [{
-                    label: 'Income',
-                    data: [150000, 200000, 250000, 300000, 280000, 100000],
-                    backgroundColor: '#4CAF50'
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    </script>
+
 
     <script>
         $(document).ready(function() {
@@ -324,76 +297,8 @@ include "../conn.php";
             });
         });
     </script>
-    <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: 'Student record has been successfully saved!',
-                    confirmButtonColor: '#3085d6'
-                }).then(() => {
-                    // Remove ?success=1 from the URL without reloading the page
-                    if (window.history.replaceState) {
-                        const url = new URL(window.location);
-                        url.searchParams.delete('success');
-                        window.history.replaceState({}, document.title, url.pathname + url.search);
-                    }
-                });
-            });
-        </script>
-    <?php endif; ?>
 
-    <script>
-        $(document).ready(function() {
-            // Existing view-student-btn code...
 
-            // Delete button handler
-            $('.delete-student-btn').on('click', function() {
-                var studentId = $(this).data('id');
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "This will permanently delete the student record.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Yes, delete it!',
-                    reverseButtons: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // AJAX request to delete
-                        $.ajax({
-                            url: 'php_functions/delete_student.php',
-                            type: 'POST',
-                            data: {
-                                student_id: studentId
-                            },
-                            success: function(response) {
-                                // Optionally, check response for success
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Deleted!',
-                                    text: 'Student record has been deleted.',
-                                    confirmButtonColor: '#3085d6'
-                                }).then(() => {
-                                    location.reload(); // Refresh page or remove row from table
-                                });
-                            },
-                            error: function() {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error!',
-                                    text: 'Failed to delete student record.',
-                                    confirmButtonColor: '#3085d6'
-                                });
-                            }
-                        });
-                    }
-                });
-            });
-        });
-    </script>
 
     <!-- Update Fees -->
     <script>
