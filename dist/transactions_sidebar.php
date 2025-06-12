@@ -57,13 +57,7 @@ include "../conn.php";
                         <h3>Transactions</h3>
                     </div>
                 </div>
-                <div class="col-auto">
-                    <button type="button" class="btn btn-success btn-s rounded-pill shadow-sm d-flex align-items-center gap-2"
-                        data-bs-toggle="modal" data-bs-target="#addStudentModal">
-                        <i class="bi bi-person-plus-fill"></i>
-                        Add Student
-                    </button>
-                </div>
+
             </div>
 
             <!-- Datatable -->
@@ -73,62 +67,62 @@ include "../conn.php";
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-striped" id="table1" style="width:100%;">
-<thead>
-    <tr>
-        <th style="display:none;">ID</th>
-        <th style="display:none;">Student ID</th>
-        <th>Student Info</th>
-        <th>Payment Type</th>
-        <th>Paid Date &amp; By</th>
-        <th>Amount</th>
-        <!-- <th>Action</th> -->
-    </tr>
-</thead>
-<tbody class="small-font-table">
-    <?php
-    $limit = 10;
-    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-    $offset = ($page - 1) * $limit;
+                                    <thead>
+                                        <tr>
+                                            <th style="display:none;">ID</th>
+                                            <th style="display:none;">Student ID</th>
+                                            <th>Student Info</th>
+                                            <th>Payment Type</th>
+                                            <th>Paid Date &amp; By</th>
+                                            <th>Amount</th>
+                                            <!-- <th>Action</th> -->
+                                        </tr>
+                                    </thead>
+                                    <tbody class="small-font-table">
+                                        <?php
+                                        $limit = 10;
+                                        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+                                        $offset = ($page - 1) * $limit;
 
-    $query = "SELECT sp.id, s.student_id, s.fname, s.mname, s.lname, s.lrn, s.grade_level, s.section, s.strand, p.payment_type, sp.amount_paid, sp.date_paid, sp.paid_by
+                                        $query = "SELECT sp.id, s.student_id, s.fname, s.mname, s.lname, s.lrn, s.grade_level, s.section, s.strand, p.payment_type, sp.amount_paid, sp.date_paid, sp.paid_by
               FROM student_payments sp
               JOIN students s ON sp.student_id = s.student_id
               JOIN payments p ON sp.payment_id = p.id
               ORDER BY sp.date_paid DESC
               LIMIT ?, ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("ii", $offset, $limit);
-    $stmt->execute();
-    $result = $stmt->get_result();
+                                        $stmt = $conn->prepare($query);
+                                        $stmt->bind_param("ii", $offset, $limit);
+                                        $stmt->execute();
+                                        $result = $stmt->get_result();
 
-    while ($row = $result->fetch_assoc()) {
-        $full_name = $row['lname'] . ', ' . $row['fname'] . ' ' . strtoupper(substr($row['mname'], 0, 1)) . '.';
-        $student_info =
-            "<strong>" . htmlspecialchars($full_name) . "</strong><br>" .
-            "LRN: " . htmlspecialchars($row['lrn']) . "<br>" .
-            "Grade: " . htmlspecialchars($row['grade_level']) . " | " .
-            "Section: " . htmlspecialchars($row['section']) . "<br>" .
-            "Strand: " . htmlspecialchars($row['strand']);
-        $paid_date_by = date('M d, Y h:ia', strtotime($row['date_paid'])) .
-            '<br><span class="text-muted small">by: ' .
-            (!empty($row['paid_by']) ? htmlspecialchars($row['paid_by']) : '-') .
-            '</span>';
-        echo "<tr>";
-        echo "<td style='display:none;'>" . htmlspecialchars($row['id']) . "</td>"; // Transaction ID
-        echo "<td style='display:none;'>" . htmlspecialchars($row['student_id']) . "</td>"; // Student ID
-        echo "<td>" . $student_info . "</td>";
-        echo "<td>" . htmlspecialchars($row['payment_type']) . "</td>";
-        echo "<td>" . $paid_date_by . "</td>";
-        echo "<td>₱" . number_format($row['amount_paid'], 2) . "</td>";
-        // echo "<td>
-        //     <button type='button' class='btn btn-primary btn-sm view-student-btn' data-id='" . htmlspecialchars($row['student_id']) . "'>
-        //         <i class='bi bi-eye'></i>
-        //     </button>
-        // </td>";
-        echo "</tr>";
-    }
+                                        while ($row = $result->fetch_assoc()) {
+                                            $full_name = $row['lname'] . ', ' . $row['fname'] . ' ' . strtoupper(substr($row['mname'], 0, 1)) . '.';
+                                            $student_info =
+                                                "<strong>" . htmlspecialchars($full_name) . "</strong><br>" .
+                                                "LRN: " . htmlspecialchars($row['lrn']) . "<br>" .
+                                                "Grade: " . htmlspecialchars($row['grade_level']) . " | " .
+                                                "Section: " . htmlspecialchars($row['section']) . "<br>" .
+                                                "Strand: " . htmlspecialchars($row['strand']);
+                                            $paid_date_by = date('M d, Y h:ia', strtotime($row['date_paid'])) .
+                                                '<br><span class="text-muted small">by: ' .
+                                                (!empty($row['paid_by']) ? htmlspecialchars($row['paid_by']) : '-') .
+                                                '</span>';
+                                            echo "<tr>";
+                                            echo "<td style='display:none;'>" . htmlspecialchars($row['id']) . "</td>"; // Transaction ID
+                                            echo "<td style='display:none;'>" . htmlspecialchars($row['student_id']) . "</td>"; // Student ID
+                                            echo "<td>" . $student_info . "</td>";
+                                            echo "<td>" . htmlspecialchars($row['payment_type']) . "</td>";
+                                            echo "<td>" . $paid_date_by . "</td>";
+                                            echo "<td>₱" . number_format($row['amount_paid'], 2) . "</td>";
+                                            // echo "<td>
+                                            //     <button type='button' class='btn btn-primary btn-sm view-student-btn' data-id='" . htmlspecialchars($row['student_id']) . "'>
+                                            //         <i class='bi bi-eye'></i>
+                                            //     </button>
+                                            // </td>";
+                                            echo "</tr>";
+                                        }
 
-    $stmt->close();
+                                        $stmt->close();
 
                                         // Pagination
                                         $resultTotal = $conn->query("SELECT COUNT(*) AS total FROM student_payments");
