@@ -194,6 +194,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             <i class="bi bi-upload"></i> Import Database
                         </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="export-tab" data-bs-toggle="tab" data-bs-target="#export" type="button" role="tab" aria-controls="export" aria-selected="false">
+                            <i class="bi bi-file-earmark-excel"></i> Export Students
+                        </button>
+                    </li>
                 </ul>
                 <div class="tab-content" id="settingsTabContent">
                     <!-- Backup Tab -->
@@ -215,6 +220,26 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                 <input type="file" name="import_file" accept=".sql" class="form-control mb-2" required>
                                 <button type="submit" class="btn btn-success">
                                     <i class="bi bi-upload"></i> Import
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Export Tab -->
+                    <div class="tab-pane fade" id="export" role="tabpanel" aria-labelledby="export-tab">
+                        <div class="mb-3">
+                            <p>Export students by grade level to Excel:</p>
+                            <form method="POST" action="php_functions/export_students_excel.php" target="_blank">
+                                <select name="grade_level" class="form-select mb-2" required>
+                                    <option value="" disabled selected>Select Grade Level</option>
+                                    <option value="7">Grade 7</option>
+                                    <option value="8">Grade 8</option>
+                                    <option value="9">Grade 9</option>
+                                    <option value="10">Grade 10</option>
+                                    <option value="11">Grade 11</option>
+                                    <option value="12">Grade 12</option>
+                                </select>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-file-earmark-excel"></i> Export to Excel
                                 </button>
                             </form>
                         </div>
@@ -245,4 +270,24 @@ $current_page = basename($_SERVER['PHP_SELF']);
             });
         }
     });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const exportForm = document.querySelector('form[action="php_functions/export_students_excel.php"]');
+    if (exportForm) {
+        exportForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'success',
+                title: 'Export Started',
+                text: 'Your Excel export will download shortly.',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                exportForm.submit(); // Continue with the download
+            });
+        });
+    }
+});
 </script>
