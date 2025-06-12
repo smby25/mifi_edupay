@@ -159,7 +159,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <li class="sidebar-title">Other Information</li>
 
                 <li class="sidebar-item">
-                    <a href="https://github.com/zuramai/mazer/blob/main/CONTRIBUTING.md" class='sidebar-link'>
+                    <a href="about_system.php" class='sidebar-link'>
                         <i class="bi bi-puzzle"></i>
                         <span>About System</span>
                     </a>
