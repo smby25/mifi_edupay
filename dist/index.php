@@ -98,20 +98,15 @@ while ($row = $res->fetch_assoc()) {
     <div id="app">
         <?php include 'sidebar.php'; ?>
         <div id="main">
-            <header class="mb-1">
+            <header class="mb-3">
                 <a href="#" class="burger-btn d-block d-xl-none">
-                    <i class="bi bi-justify fs-3"></i>
+                    <i class="bi bi-justify fs-3 text-primary"></i>
                 </a>
             </header>
 
-            <div class="row">
-                <!-- All your dashboard content here -->
-            </div>
-            <br>
-            <div class="page-heading mb-3 mt-5">
+            <div class="page-heading mb-4">
                 <h3>Accounting Dashboard</h3>
             </div>
-
             <div class="row">
                 <!-- Total Income Card -->
                 <div class="col-12">
@@ -211,7 +206,7 @@ while ($row = $res->fetch_assoc()) {
             <footer>
                 <div class="footer clearfix mb-0 text-muted">
                     <div class="float-start">
-                        <p>2021 &copy; Mazer</p>
+                        <p>2025 &copy; Development Execute</p>
                     </div>
                     <div class="float-end">
                         <p>Developed by <a
@@ -231,64 +226,109 @@ while ($row = $res->fetch_assoc()) {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        let incomeChart;
+    let incomeChart;
 
-        function updateIncomeChart(labels, data) {
-            if (incomeChart) {
-                incomeChart.data.labels = labels;
-                incomeChart.data.datasets[0].data = data;
-                incomeChart.update();
-            }
+    function updateIncomeChart(labels, data) {
+        if (incomeChart) {
+            incomeChart.data.labels = labels;
+            incomeChart.data.datasets[0].data = data;
+            incomeChart.update();
         }
+    }
 
-        function fetchIncomeChartData(type) {
-            $.get('php_functions/get_income_chart_data.php', {
-                type: type
-            }, function(res) {
-                let json = JSON.parse(res);
-                if (!incomeChart) {
-                    // Initialize chart on first load
-                    const ctx = document.getElementById('incomeChart').getContext('2d');
-                    incomeChart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: json.labels,
-                            datasets: [{
-                                label: 'Income',
-                                data: json.data,
-                                backgroundColor: '#4CAF50'
-                            }]
+    function fetchIncomeChartData(type) {
+        $.get('php_functions/get_income_chart_data.php', {
+            type: type
+        }, function(res) {
+            let json;
+            try {
+                json = typeof res === 'string' ? JSON.parse(res) : res;
+            } catch (e) {
+                json = { labels: [], data: [] };
+            }
+            if (!incomeChart) {
+                // Initialize chart on first load
+                const ctx = document.getElementById('incomeChart').getContext('2d');
+                incomeChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: json.labels,
+                        datasets: [{
+                            label: 'Income',
+                            data: json.data,
+                            backgroundColor: '#4CAF50'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
                         },
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                legend: {
-                                    display: false
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true
-                                }
+                        scales: {
+                            y: {
+                                beginAtZero: true
                             }
                         }
-                    });
-                } else {
-                    updateIncomeChart(json.labels, json.data);
+                    }
+                });
+            } else {
+                updateIncomeChart(json.labels, json.data);
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        // Always destroy and re-create the chart on filter change to avoid stale data
+        function reloadIncomeChart(type) {
+            $.get('php_functions/get_income_chart_data.php', { type: type }, function(res) {
+                let json;
+                try {
+                    json = typeof res === 'string' ? JSON.parse(res) : res;
+                } catch (e) {
+                    json = { labels: [], data: [] };
                 }
+                if (incomeChart) {
+                    incomeChart.destroy();
+                }
+                const ctx = document.getElementById('incomeChart').getContext('2d');
+                incomeChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: json.labels,
+                        datasets: [{
+                            label: 'Income',
+                            data: json.data,
+                            backgroundColor: '#4CAF50'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
             });
         }
 
-        $(document).ready(function() {
-            // Get the initial value of the dropdown
-            let initialType = $('#incomeChartFilter').val();
-            fetchIncomeChartData(initialType);
+        // Initial load
+        let initialType = $('#incomeChartFilter').val();
+        reloadIncomeChart(initialType);
 
-            $('#incomeChartFilter').on('change', function() {
-                fetchIncomeChartData($(this).val());
-            });
+        $('#incomeChartFilter').on('change', function() {
+            reloadIncomeChart($(this).val());
         });
-    </script>
+    });
+</script>
 </body>
 
 </html>
