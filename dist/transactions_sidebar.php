@@ -80,7 +80,7 @@ include "../conn.php";
         <th>Student Info</th>
         <th>Payment Type</th>
         <th>Paid Date &amp; By</th>
-        <th>Amount</th>
+        <!-- <th>Amount</th> -->
         <th>Action</th>
     </tr>
 </thead>
@@ -120,11 +120,11 @@ include "../conn.php";
         echo "<td>" . htmlspecialchars($row['payment_type']) . "</td>";
         echo "<td>" . $paid_date_by . "</td>";
         echo "<td>₱" . number_format($row['amount_paid'], 2) . "</td>";
-        echo "<td>
-            <button type='button' class='btn btn-primary btn-sm view-student-btn' data-id='" . htmlspecialchars($row['student_id']) . "'>
-                <i class='bi bi-eye'></i>
-            </button>
-        </td>";
+        // echo "<td>
+        //     <button type='button' class='btn btn-primary btn-sm view-student-btn' data-id='" . htmlspecialchars($row['student_id']) . "'>
+        //         <i class='bi bi-eye'></i>
+        //     </button>
+        // </td>";
         echo "</tr>";
     }
 
