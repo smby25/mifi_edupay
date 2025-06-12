@@ -82,6 +82,13 @@ while ($row = $res->fetch_assoc()) {
     <link rel="stylesheet" href="assets/css/app.css">
     <link rel="shortcut icon" href="assets/images/favicon.svg" type="image/x-icon">
     <link rel="icon" type="image/png" href="assets/css/img/malindig_logo.png">
+
+    <!-- <style>
+        body,
+        html {
+            font-family: Arial, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+        }
+    </style> -->
 </head>
 
 
@@ -224,54 +231,64 @@ while ($row = $res->fetch_assoc()) {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-let incomeChart;
+        let incomeChart;
 
-function updateIncomeChart(labels, data) {
-    if (incomeChart) {
-        incomeChart.data.labels = labels;
-        incomeChart.data.datasets[0].data = data;
-        incomeChart.update();
-    }
-}
+        function updateIncomeChart(labels, data) {
+            if (incomeChart) {
+                incomeChart.data.labels = labels;
+                incomeChart.data.datasets[0].data = data;
+                incomeChart.update();
+            }
+        }
 
-function fetchIncomeChartData(type) {
-    $.get('php_functions/get_income_chart_data.php', { type: type }, function(res) {
-        let json = JSON.parse(res);
-        if (!incomeChart) {
-            // Initialize chart on first load
-            const ctx = document.getElementById('incomeChart').getContext('2d');
-            incomeChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: json.labels,
-                    datasets: [{
-                        label: 'Income',
-                        data: json.data,
-                        backgroundColor: '#4CAF50'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true } }
+        function fetchIncomeChartData(type) {
+            $.get('php_functions/get_income_chart_data.php', {
+                type: type
+            }, function(res) {
+                let json = JSON.parse(res);
+                if (!incomeChart) {
+                    // Initialize chart on first load
+                    const ctx = document.getElementById('incomeChart').getContext('2d');
+                    incomeChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: json.labels,
+                            datasets: [{
+                                label: 'Income',
+                                data: json.data,
+                                backgroundColor: '#4CAF50'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    updateIncomeChart(json.labels, json.data);
                 }
             });
-        } else {
-            updateIncomeChart(json.labels, json.data);
         }
-    });
-}
 
-$(document).ready(function() {
-    // Get the initial value of the dropdown
-    let initialType = $('#incomeChartFilter').val();
-    fetchIncomeChartData(initialType);
+        $(document).ready(function() {
+            // Get the initial value of the dropdown
+            let initialType = $('#incomeChartFilter').val();
+            fetchIncomeChartData(initialType);
 
-    $('#incomeChartFilter').on('change', function() {
-        fetchIncomeChartData($(this).val());
-    });
-});
-</script>
+            $('#incomeChartFilter').on('change', function() {
+                fetchIncomeChartData($(this).val());
+            });
+        });
+    </script>
 </body>
 
 </html>

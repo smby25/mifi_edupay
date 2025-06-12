@@ -252,15 +252,15 @@ include "../conn.php";
                                     if (data.length > 0) {
                                         var rows = '';
                                         data.forEach(function(item) {
-                                            // Show modal if fully paid
-                                            if (parseFloat(item.remaining) <= 0) {
-                                                Swal.fire({
-                                                    icon: 'info',
-                                                    title: 'Fully Paid!',
-                                                    text: 'The payment type "' + item.payment_type + '" is already fully paid.',
-                                                    confirmButtonColor: '#3085d6'
-                                                });
-                                            }
+                                            // // Show modal if fully paid
+                                            // if (parseFloat(item.remaining) <= 0) {
+                                            //     Swal.fire({
+                                            //         icon: 'info',
+                                            //         title: 'Fully Paid!',
+                                            //         text: 'The payment type "' + item.payment_type + '" is already fully paid.',
+                                            //         confirmButtonColor: '#3085d6'
+                                            //     });
+                                            // }
                                             rows += '<tr>' +
                                                 '<td style="display:none;">' + item.student_id + '</td>' +
                                                 '<td style="display:none;">' + item.id + '</td>' +

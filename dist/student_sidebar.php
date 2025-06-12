@@ -26,6 +26,13 @@ include "../conn.php";
     <link rel="stylesheet" href="assets/css/app.css">
     <link rel="shortcut icon" href="assets/images/favicon.svg" type="image/x-icon">
     <link rel="icon" type="image/png" href="assets/css/img/malindig_logo.png">
+
+        <!-- <style>
+        body,
+        html {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+        }
+    </style> -->
 </head>
 <!-- Bootstrap 5 CSS -->
 <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"> -->
