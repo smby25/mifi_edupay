@@ -69,7 +69,7 @@ include "../conn.php";
 
             <!-- Filter Dropdown -->
             <div class="mb-2">
-                <label for="gradeSectionStrandFilter" class="form-label">Filter by Grade &amp; Section / Strand</label>
+                <!-- <label for="gradeSectionStrandFilter" class="form-label">Filter by Grade &amp; Section / Strand</label> -->
                 <select id="gradeSectionStrandFilter" class="form-select" style="width:auto;display:inline-block;">
                     <option value="">All</option>
                 </select>

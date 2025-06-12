@@ -64,6 +64,14 @@ include "../conn.php";
                 </div>
             </div>
 
+            <!-- Filter Dropdown -->
+            <div class="mb-2">
+                <!-- <label for="gradeSectionStrandFilter" class="form-label">Filter by Grade &amp; Section / Strand</label> -->
+                <select id="gradeSectionStrandFilter" class="form-select" style="width:auto;display:inline-block;">
+                    <option value="">All</option>
+                </select>
+            </div>
+
             <!-- Datatable -->
             <div class="table-responsive">
                 <section class="section">
@@ -163,8 +171,9 @@ include "../conn.php";
                 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
                 <script>
                     $(document).ready(function() {
-                        if (!$.fn.DataTable.isDataTable('#table1')) {
-                            $('#table1').DataTable({
+                        var table;
+                        if (!$.fn.DataTable.isDataTable('#paymentsTable')) {
+                            table = $('#paymentsTable').DataTable({
                                 "paging": false,
                                 "searching": true,
                                 "ordering": true,
@@ -172,7 +181,24 @@ include "../conn.php";
                                 "responsive": true,
                                 "autoWidth": false
                             });
+                        } else {
+                            table = $('#paymentsTable').DataTable();
                         }
+
+                        // Populate the dropdown with unique values from the Grade/Section/Strand column (index 2)
+                        var uniqueValues = {};
+                        table.column(2).data().each(function(d) {
+                            uniqueValues[d] = true;
+                        });
+                        $.each(Object.keys(uniqueValues).sort(), function(i, v) {
+                            $('#gradeSectionStrandFilter').append('<option value="' + v + '">Grade ' + v + '</option>');
+                        });
+
+                        // Filter table when dropdown changes
+                        $('#gradeSectionStrandFilter').on('change', function() {
+                            var val = $(this).val();
+                            table.column(2).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
+                        });
                     });
                 </script>
                 <style>
