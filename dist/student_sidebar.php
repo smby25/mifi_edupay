@@ -82,7 +82,7 @@ include "../conn.php";
                                             <th>Grade</th>
                                             <th>Section</th>
                                             <th>Strand</th>
-                                            <th>Status</th>
+                                            <th style="display:none;">Status</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -92,7 +92,7 @@ include "../conn.php";
                                         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
                                         $offset = ($page - 1) * $limit;
 
-                                        $query = "SELECT SQL_CALC_FOUND_ROWS student_id, fname, mname, lname, lrn, grade_level, section, strand, status FROM students LIMIT ?, ?";
+                                        $query = "SELECT SQL_CALC_FOUND_ROWS student_id, fname, mname, lname, lrn, grade_level, section, strand, status FROM students WHERE status = 'active' LIMIT ?, ?";
                                         $stmt = $conn->prepare($query);
                                         $stmt->bind_param("ii", $offset, $limit);
                                         $stmt->execute();
@@ -109,7 +109,7 @@ include "../conn.php";
                                             echo "<td>" . htmlspecialchars($row['grade_level']) . "</td>";
                                             echo "<td>" . htmlspecialchars($row['section']) . "</td>";
                                             echo "<td>" . htmlspecialchars($row['strand']) . "</td>";
-                                            echo "<td>" . htmlspecialchars($row['status']) . "</td>";
+                                            echo "<td style='display:none;'>" . htmlspecialchars($row['status']) . "</td>";
                                             echo "<td>
                                     <button type='button' class='btn btn-primary btn-sm view-student-btn' data-id='" . htmlspecialchars($row['student_id']) . "'>
                                         <i class='bi bi-eye'></i>

@@ -96,7 +96,11 @@ include "../conn.php";
                                         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
                                         $offset = ($page - 1) * $limit;
 
-                                        $query = "SELECT SQL_CALC_FOUND_ROWS student_id, fname, mname, lname, grade_level, section, strand FROM students LIMIT ?, ?";
+                                        // Only select students with status = 'active'
+                                        $query = "SELECT SQL_CALC_FOUND_ROWS student_id, fname, mname, lname, grade_level, section, strand 
+                                                  FROM students 
+                                                  WHERE status = 'active'
+                                                  LIMIT ?, ?";
                                         $stmt = $conn->prepare($query);
                                         $stmt->bind_param("ii", $offset, $limit);
                                         $stmt->execute();
@@ -248,8 +252,16 @@ include "../conn.php";
                                     if (data.length > 0) {
                                         var rows = '';
                                         data.forEach(function(item) {
+                                            // Show modal if fully paid
+                                            if (parseFloat(item.remaining) <= 0) {
+                                                Swal.fire({
+                                                    icon: 'info',
+                                                    title: 'Fully Paid!',
+                                                    text: 'The payment type "' + item.payment_type + '" is already fully paid.',
+                                                    confirmButtonColor: '#3085d6'
+                                                });
+                                            }
                                             rows += '<tr>' +
-                                                // Hidden columns for student_id and payment_id
                                                 '<td style="display:none;">' + item.student_id + '</td>' +
                                                 '<td style="display:none;">' + item.id + '</td>' +
                                                 '<td>' + item.payment_type + '</td>' +
@@ -306,10 +318,23 @@ include "../conn.php";
 
             <script>
                 $(function() {
-                    $(document).on('click', '.pay-row-btn', function() {
-                        $('#payType').text($(this).data('payment_type'));
+                    $(document).on('click', '.pay-row-btn', function(e) {
+                        var remaining = parseFloat($(this).data('remaining'));
+                        var paymentType = $(this).data('payment_type');
+                        if (remaining <= 0) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Fully Paid!',
+                                text: 'The payment type "' + paymentType + '" is already fully paid.',
+                                confirmButtonColor: '#3085d6'
+                            });
+                            e.preventDefault();
+                            return false;
+                        }
+                        // Only show modal if not fully paid
+                        $('#payType').text(paymentType);
                         $('#payTotal').text('₱' + parseFloat($(this).data('amount')).toLocaleString());
-                        $('#payRemaining').text('₱' + parseFloat($(this).data('remaining')).toLocaleString());
+                        $('#payRemaining').text('₱' + remaining.toLocaleString());
                         $('#payAmount').val('');
                         $('#payModal').data('payment_id', $(this).data('payment_id')); // store payment_id in modal
                         $('#payModal').modal('show');
