@@ -124,25 +124,26 @@ include "../conn.php";
 
                                             // Get remaining balance (total fees - payments)
                                             $balance_query = "
-                                                SELECT 
-                                                    IFNULL((
-                                                        SELECT SUM(p.amount)
-                                                        FROM payments p
-                                                        WHERE p.target_grade = ?
-                                                    ), 0) 
-                                                    - 
-                                                    IFNULL((
-                                                        SELECT SUM(sp.amount_paid)
-                                                        FROM student_payments sp
-                                                        WHERE sp.student_id = ?
-                                                    ), 0) AS balance
-                                            ";
+    SELECT 
+        IFNULL((
+            SELECT SUM(p.amount)
+            FROM payments p
+            WHERE p.target_grade = ? OR p.student_id = ?
+        ), 0)
+        -
+        IFNULL((
+            SELECT SUM(sp.amount_paid)
+            FROM student_payments sp
+            WHERE sp.student_id = ?
+        ), 0) AS balance
+";
                                             $bal_stmt = $conn->prepare($balance_query);
-                                            $bal_stmt->bind_param("si", $grade, $student_id);
+                                            $bal_stmt->bind_param("sii", $grade, $student_id, $student_id);
                                             $bal_stmt->execute();
                                             $bal_result = $bal_stmt->get_result();
                                             $balance = $bal_result->fetch_assoc()['balance'] ?? 0;
                                             $bal_stmt->close();
+
 
                                             echo "<tr>";
                                             echo "<td style='display:none;'>" . htmlspecialchars($student_id) . "</td>";
@@ -150,15 +151,15 @@ include "../conn.php";
                                             echo "<td>" . $grade_section_strand . "</td>";
                                             echo "<td>₱" . number_format($balance, 2) . "</td>";
                                             echo "<td>
-                                                    <button type='button' class='btn btn-primary btn-sm view-student-btn' 
-                                                        data-id='" . htmlspecialchars($student_id) . "'
-                                                        data-name='" . htmlspecialchars($full_name) . "'
-                                                        data-grade='" . htmlspecialchars($grade) . "'
-                                                        data-section='" . htmlspecialchars($section) . "'
-                                                        data-balance='" . number_format($balance, 2) . "'>
-                                                        <i class='bi bi-eye'></i> View
-                                                    </button>
-                                                </td>";
+        <button type='button' class='btn btn-primary btn-sm view-student-btn' 
+            data-id='" . htmlspecialchars($student_id) . "'
+            data-name='" . htmlspecialchars($full_name) . "'
+            data-grade='" . htmlspecialchars($grade) . "'
+            data-section='" . htmlspecialchars($section) . "'
+            data-balance='" . $balance . "'> <!-- NO number_format here -->
+            <i class='bi bi-eye'></i> View
+        </button>
+      </td>";
                                             echo "</tr>";
                                         }
                                         $stmt->close();
@@ -218,79 +219,82 @@ include "../conn.php";
                     });
                 </script>
 
-                <!-- Student Payment Info Modal -->
-                <script>
-                    $(document).ready(function() {
-                        $('.view-student-btn').on('click', function() {
-                            var studentId = $(this).data('id');
-                            var studentName = $(this).data('name');
-                            var grade = $(this).data('grade');
-                            var section = $(this).data('section');
-                            var balance = $(this).data('balance');
+<!-- Student Payment Info Modal -->
+<script>
+    $(document).ready(function () {
+        $('.view-student-btn').on('click', function () {
+            const studentId = $(this).data('id');
+            const studentName = $(this).data('name');
+            const grade = $(this).data('grade');
+            const section = $(this).data('section');
+            const balance = parseFloat($(this).data('balance')) || 0;
 
-                            $('#modalStudentId').text(studentId);
-                            $('#modalStudentName').text(studentName);
-                            $('#modalGradeSection').text('Grade - ' + grade + ' | ' + section);
-                            $('#modalBalanceAmount').text('Php ' + balance);
+            // Set modal header details
+            $('#modalStudentId').text(studentId);
+            $('#modalStudentName').text(studentName);
+            $('#modalGradeSection').text(`Grade - ${grade} | ${section}`);
+            $('#modalBalanceAmount').text(`₱${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
 
-                            var today = new Date();
-                            var dateString = today.toLocaleString('default', {
-                                month: 'long'
-                            }) + ' ' + today.getDate() + ', ' + today.getFullYear();
-                            $('#modalBalanceDate').text(dateString);
 
-                            // Fetch payment types for this grade and student
-                            $.ajax({
-                                url: 'php_functions/get_payment_types.php',
-                                type: 'GET',
-                                data: {
-                                    grade: grade,
-                                    student_id: studentId
-                                },
-                                dataType: 'json',
-                                success: function(data) {
-                                    if (data.length > 0) {
-                                        var rows = '';
-                                        data.forEach(function(item) {
-                                            // // Show modal if fully paid
-                                            // if (parseFloat(item.remaining) <= 0) {
-                                            //     Swal.fire({
-                                            //         icon: 'info',
-                                            //         title: 'Fully Paid!',
-                                            //         text: 'The payment type "' + item.payment_type + '" is already fully paid.',
-                                            //         confirmButtonColor: '#3085d6'
-                                            //     });
-                                            // }
-                                            rows += '<tr>' +
-                                                '<td style="display:none;">' + item.student_id + '</td>' +
-                                                '<td style="display:none;">' + item.id + '</td>' +
-                                                '<td>' + item.payment_type + '</td>' +
-                                                '<td>' + (item.amount ? '₱' + parseFloat(item.amount).toLocaleString() : '-') + '</td>' +
-                                                '<td>' + (item.remaining !== undefined ? '₱' + parseFloat(item.remaining).toLocaleString() : '-') + '</td>' +
-                                                '<td><button type="button" ' +
-                                                'class="btn btn-success btn-sm pay-btn pay-row-btn" ' +
-                                                'data-payment_type="' + item.payment_type + '" ' +
-                                                'data-amount="' + item.amount + '" ' +
-                                                'data-remaining="' + item.remaining + '" ' +
-                                                'data-student_id="' + $('#modalStudentId').text() + '" ' +
-                                                'data-payment_id="' + item.id + '">' +
-                                                '<i class="bi bi-cash"></i> Pay</button></td>' +
-                                                '</tr>';
-                                        });
-                                        $('#modalPaymentTable').html(rows);
-                                    } else {
-                                        $('#modalPaymentTable').html('<tr><td colspan="4" class="text-center text-muted">No payment types found.</td></tr>');
-                                    }
-                                },
-                                error: function() {
-                                    $('#modalPaymentTable').html('<tr><td colspan="4" class="text-center text-danger">Error loading payment types.</td></tr>');
-                                }
-                            });
+            const today = new Date();
+            const dateString = today.toLocaleString('default', { month: 'long' }) + ' ' + today.getDate() + ', ' + today.getFullYear();
+            $('#modalBalanceDate').text(dateString);
 
-                            $('#studentModal').modal('show');
+            // Clear previous rows while loading
+            $('#modalPaymentTable').html('<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>');
+
+            // AJAX request to get payment types
+            $.ajax({
+                url: 'php_functions/get_payment_types.php',
+                method: 'GET',
+                data: {
+                    grade: grade,
+                    student_id: studentId
+                },
+                dataType: 'json',
+                success: function (data) {
+                    let rows = '';
+                    if (data.length > 0) {
+                        data.forEach(item => {
+                            const paymentAmount = parseFloat(item.amount) || 0;
+                            const remainingAmount = parseFloat(item.remaining) || 0;
+
+                            rows += `
+                                <tr>
+                                    <td style="display:none;">${studentId}</td>
+                                    <td style="display:none;">${item.id}</td>
+                                    <td>${item.payment_type}</td>
+                                    <td>₱${paymentAmount.toLocaleString()}</td>
+                                    <td>₱${remainingAmount.toLocaleString()}</td>
+                                    <td>
+                                        <button type="button"
+                                            class="btn btn-success btn-sm pay-btn pay-row-btn"
+                                            data-payment_type="${item.payment_type}"
+                                            data-amount="${paymentAmount}"
+                                            data-remaining="${remainingAmount}"
+                                            data-student_id="${studentId}"
+                                            data-payment_id="${item.id}">
+                                            <i class="bi bi-cash"></i> Pay
+                                        </button>
+                                    </td>
+                                </tr>`;
                         });
-                    });
-                </script>
+                    } else {
+                        rows = `<tr><td colspan="6" class="text-center text-muted">No payment types found.</td></tr>`;
+                    }
+
+                    $('#modalPaymentTable').html(rows);
+                },
+                error: function () {
+                    $('#modalPaymentTable').html('<tr><td colspan="6" class="text-center text-danger">Error loading payment types.</td></tr>');
+                }
+            });
+
+            $('#studentModal').modal('show');
+        });
+    });
+</script>
+
                 <style>
                     /* Ensure table text wraps and doesn't overflow on small screens */
                     .table td,
@@ -372,20 +376,6 @@ include "../conn.php";
                 </div>
             </footer>
 
-            <!-- Success Modal
-            <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header bg-success text-white">
-                            <h5 class="modal-title" id="successModalLabel">Success</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            Student record has been successfully saved!
-                        </div>
-                    </div>
-                </div>
-            </div> -->
         </div>
     </div>
     <script src="assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
@@ -516,45 +506,6 @@ include "../conn.php";
             });
         });
     </script>
-
-    <!-- Add Payment -->
-    <!-- <script>
-        $(document).on('click', '#confirmPayBtn', function() {
-            var studentId = $('#modalStudentId').text();
-            var amountToPay = $('#payAmount').val();
-            var paymentId = $('#payModal').data('payment_id'); // get payment_id from modal
-
-            if (!amountToPay || parseFloat(amountToPay) <= 0) {
-                alert('Please enter a valid amount.');
-                return;
-            }
-
-            $.ajax({
-                url: 'php_functions/save_student_payment.php',
-                type: 'POST',
-                data: {
-                    student_id: studentId,
-                    payment_id: paymentId,
-                    amount_paid: amountToPay
-                },
-                success: function(response) {
-                    $('#payModal').modal('hide');
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Payment Successful!',
-                        text: 'The payment has been saved.',
-                        confirmButtonColor: '#3085d6'
-                    }).then(() => {
-                        // Optionally, refresh the payment table or modal here
-                        location.reload();
-                    });
-                },
-                error: function() {
-                    alert('Error saving payment.');
-                }
-            });
-        });
-    </script> -->
 
     <!-- Add Payment -->
     <script>
