@@ -16,13 +16,15 @@
           <div class="mb-3">
             <label for="targetGrade" class="form-label">Target Grade</label>
             <select name="target_grade" id="targetGrade" class="form-select" required>
-                <option value="" selected disabled>Choose grade</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="9">9</option>
-                <option value="10">10</option>
-                <option value="11">11</option>
-                <option value="12">12</option>
+              <option value="" selected disabled>Choose grade</option>
+              <option value="nursery">Nursery</option>
+              <option value="kinder">Kinder</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
             </select>
           </div>
 

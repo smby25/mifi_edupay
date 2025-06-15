@@ -99,6 +99,8 @@
                         <label class="form-label">Grade Level <span class="text-danger">*</span></label>
                         <select class="form-select" id="gradeLevelSelect" name="grade_level" required>
                             <option value="" disabled selected>Select</option>
+                            <option value="Nursery">Nursery</option>
+                            <option value="Kindery">Kindery</option>
                             <option value="7">7</option>
                             <option value="8">8</option>
                             <option value="9">9</option>
