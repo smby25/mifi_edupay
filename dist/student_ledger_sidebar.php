@@ -509,11 +509,33 @@ include "../conn.php";
 
     <!-- Add Payment -->
     <script>
-        $(document).on('click', '#confirmPayBtn', function() {
+        // Show SweetAlert2 warning for overpayment
+        function showOverpayWarning() {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Overpayment Warning',
+                text: 'The amount entered exceeds the remaining balance. Please enter a valid amount.',
+                confirmButtonColor: '#ffc107',
+                confirmButtonText: 'Okay'
+            });
+        }
+
+        $(document).on('click', '#confirmPayBtn', function(e) {
             var studentId = $('#modalStudentId').text();
             var amountToPay = $('#payAmount').val();
             var paymentId = $('#payModal').data('payment_id'); // get payment_id from modal
             var paidBy = $('#paidBy').val();
+
+            // Overpayment check
+            var payAmount = parseFloat(amountToPay) || 0;
+            var remaining = parseFloat($('#payRemaining').text().replace(/[₱,]/g, '')) || 0;
+            if (payAmount > remaining) {
+                // Show the overpayment modal
+                // var overpayModal = new bootstrap.Modal(document.getElementById('overpayModal'));
+                // overpayModal.show();
+                showOverpayWarning();
+                return;
+            }
 
             if (!amountToPay || parseFloat(amountToPay) <= 0) {
                 Swal.fire('Invalid Amount', 'Please enter a valid amount.', 'warning');
@@ -561,6 +583,21 @@ include "../conn.php";
                     });
                 }
             });
+        });
+
+        // Also support direct JS event for confirmPayBtn (in case of non-jQuery usage)
+        document.getElementById("confirmPayBtn")?.addEventListener("click", function (e) {
+            const payAmount = parseFloat(document.getElementById("payAmount").value) || 0;
+            const remaining = parseFloat(document.getElementById("payRemaining").textContent.replace(/[₱,]/g, '')) || 0;
+
+            if (payAmount > remaining) {
+                // const overpayModal = new bootstrap.Modal(document.getElementById('overpayModal'));
+                // overpayModal.show();
+                showOverpayWarning();
+                // Prevent further action
+                e.preventDefault();
+                return false;
+            }
         });
     </script>
 
