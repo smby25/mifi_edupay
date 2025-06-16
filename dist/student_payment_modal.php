@@ -41,13 +41,19 @@
           </table>
         </div>
 
-<button class="btn btn-outline-primary d-flex align-items-center gap-2"
-        data-bs-toggle="modal"
-        data-bs-target="#recentTransactionsModal"
-        id="viewRecentTransactionsBtn">
-  <i class="bi bi-clock-history"></i>
-  View Recent Transactions
-</button>
+<div class="d-flex justify-content-between align-items-center mt-3">
+  <button class="btn btn-outline-primary d-flex align-items-center gap-2"
+          data-bs-toggle="modal"
+          data-bs-target="#recentTransactionsModal"
+          id="viewRecentTransactionsBtn">
+    <i class="bi bi-clock-history"></i>
+    View Recent Transactions
+  </button>
+
+  <button type="button" class="btn btn-danger" id="exportPdfBtn">
+    <i class="bi bi-file-earmark-pdf-fill me-1"></i> Export Payment Summary (PDF)
+  </button>
+</div>
 
       </div>
       <div class="modal-footer">
@@ -115,6 +121,9 @@
 <button class="btn btn-primary" id="seeAllTransactionsBtn">
   See all transactions
 </button>
+
+
+
 
         </div>
       </div>
@@ -186,5 +195,22 @@
     loadTransactions(currentStudentId, showingAll);
 
     this.textContent = showingAll ? "Show less" : "See all transactions";
+  });
+</script>
+
+
+<script>
+  document.getElementById("exportPdfBtn").addEventListener("click", function () {
+    const studentId = document.getElementById("modalStudentId").textContent.trim();
+    if (studentId) {
+      const link = document.createElement('a');
+      link.href = `php_functions/export_student_ledger_pdf.php?student_id=${studentId}`;
+      link.download = `student_ledger_${studentId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      alert("Student ID is missing.");
+    }
   });
 </script>
