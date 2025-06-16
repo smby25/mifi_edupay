@@ -75,7 +75,9 @@ include "../conn.php";
                     </select>
                 </div>
                 <div>
-                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exportModal">
+                    <button class="btn btn-outline-success d-flex align-items-center gap-2 rounded-pill shadow-sm px-3"
+                        data-bs-toggle="modal" data-bs-target="#exportModal">
+                        <i class="bi bi-download"></i>
                         Export by Grade
                     </button>
                 </div>
@@ -664,9 +666,11 @@ include "../conn.php";
     <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exportModalLabel">Export by Grade</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="exportModalLabel"></h5>
+                        <i class="bi bi-download me-2"></i>Export Student Ledger by Grade
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <label for="gradeSelect">Select Grade:</label>
