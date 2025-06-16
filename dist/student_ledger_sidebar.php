@@ -67,12 +67,18 @@ include "../conn.php";
                 </div>
             </div>
 
-            <!-- Filter Dropdown -->
-            <div class="mb-2">
-                <!-- <label for="gradeSectionStrandFilter" class="form-label">Filter by Grade &amp; Section / Strand</label> -->
-                <select id="gradeSectionStrandFilter" class="form-select" style="width:auto;display:inline-block;">
-                    <option value="">All</option>
-                </select>
+            <!-- Filter Dropdown (left) and Export Button (right) in 1 Row -->
+            <div class="mb-2 d-flex align-items-center justify-content-between flex-wrap">
+                <div>
+                    <select id="gradeSectionStrandFilter" class="form-select" style="width:auto;display:inline-block;">
+                        <option value="">All</option>
+                    </select>
+                </div>
+                <div>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exportModal">
+                        Export by Grade
+                    </button>
+                </div>
             </div>
             <!-- Datatable -->
             <div class="table-responsive">
@@ -219,47 +225,49 @@ include "../conn.php";
                     });
                 </script>
 
-<!-- Student Payment Info Modal -->
-<script>
-    $(document).ready(function () {
-        $('.view-student-btn').on('click', function () {
-            const studentId = $(this).data('id');
-            const studentName = $(this).data('name');
-            const grade = $(this).data('grade');
-            const section = $(this).data('section');
-            const balance = parseFloat($(this).data('balance')) || 0;
+                <!-- Student Payment Info Modal -->
+                <script>
+                    $(document).ready(function() {
+                        $('.view-student-btn').on('click', function() {
+                            const studentId = $(this).data('id');
+                            const studentName = $(this).data('name');
+                            const grade = $(this).data('grade');
+                            const section = $(this).data('section');
+                            const balance = parseFloat($(this).data('balance')) || 0;
 
-            // Set modal header details
-            $('#modalStudentId').text(studentId);
-            $('#modalStudentName').text(studentName);
-            $('#modalGradeSection').text(`Grade - ${grade} | ${section}`);
-            $('#modalBalanceAmount').text(`₱${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+                            // Set modal header details
+                            $('#modalStudentId').text(studentId);
+                            $('#modalStudentName').text(studentName);
+                            $('#modalGradeSection').text(`Grade - ${grade} | ${section}`);
+                            $('#modalBalanceAmount').text(`₱${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
 
 
-            const today = new Date();
-            const dateString = today.toLocaleString('default', { month: 'long' }) + ' ' + today.getDate() + ', ' + today.getFullYear();
-            $('#modalBalanceDate').text(dateString);
+                            const today = new Date();
+                            const dateString = today.toLocaleString('default', {
+                                month: 'long'
+                            }) + ' ' + today.getDate() + ', ' + today.getFullYear();
+                            $('#modalBalanceDate').text(dateString);
 
-            // Clear previous rows while loading
-            $('#modalPaymentTable').html('<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>');
+                            // Clear previous rows while loading
+                            $('#modalPaymentTable').html('<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>');
 
-            // AJAX request to get payment types
-            $.ajax({
-                url: 'php_functions/get_payment_types.php',
-                method: 'GET',
-                data: {
-                    grade: grade,
-                    student_id: studentId
-                },
-                dataType: 'json',
-                success: function (data) {
-                    let rows = '';
-                    if (data.length > 0) {
-                        data.forEach(item => {
-                            const paymentAmount = parseFloat(item.amount) || 0;
-                            const remainingAmount = parseFloat(item.remaining) || 0;
+                            // AJAX request to get payment types
+                            $.ajax({
+                                url: 'php_functions/get_payment_types.php',
+                                method: 'GET',
+                                data: {
+                                    grade: grade,
+                                    student_id: studentId
+                                },
+                                dataType: 'json',
+                                success: function(data) {
+                                    let rows = '';
+                                    if (data.length > 0) {
+                                        data.forEach(item => {
+                                            const paymentAmount = parseFloat(item.amount) || 0;
+                                            const remainingAmount = parseFloat(item.remaining) || 0;
 
-                            rows += `
+                                            rows += `
                                 <tr>
                                     <td style="display:none;">${studentId}</td>
                                     <td style="display:none;">${item.id}</td>
@@ -278,22 +286,22 @@ include "../conn.php";
                                         </button>
                                     </td>
                                 </tr>`;
+                                        });
+                                    } else {
+                                        rows = `<tr><td colspan="6" class="text-center text-muted">No payment types found.</td></tr>`;
+                                    }
+
+                                    $('#modalPaymentTable').html(rows);
+                                },
+                                error: function() {
+                                    $('#modalPaymentTable').html('<tr><td colspan="6" class="text-center text-danger">Error loading payment types.</td></tr>');
+                                }
+                            });
+
+                            $('#studentModal').modal('show');
                         });
-                    } else {
-                        rows = `<tr><td colspan="6" class="text-center text-muted">No payment types found.</td></tr>`;
-                    }
-
-                    $('#modalPaymentTable').html(rows);
-                },
-                error: function () {
-                    $('#modalPaymentTable').html('<tr><td colspan="6" class="text-center text-danger">Error loading payment types.</td></tr>');
-                }
-            });
-
-            $('#studentModal').modal('show');
-        });
-    });
-</script>
+                    });
+                </script>
 
                 <style>
                     /* Ensure table text wraps and doesn't overflow on small screens */
@@ -586,7 +594,7 @@ include "../conn.php";
         });
 
         // Also support direct JS event for confirmPayBtn (in case of non-jQuery usage)
-        document.getElementById("confirmPayBtn")?.addEventListener("click", function (e) {
+        document.getElementById("confirmPayBtn")?.addEventListener("click", function(e) {
             const payAmount = parseFloat(document.getElementById("payAmount").value) || 0;
             const remaining = parseFloat(document.getElementById("payRemaining").textContent.replace(/[₱,]/g, '')) || 0;
 
@@ -651,6 +659,63 @@ include "../conn.php";
             });
         });
     </script>
+
+    <!-- Export Modal -->
+    <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exportModalLabel">Export by Grade</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="gradeSelect">Select Grade:</label>
+                    <select id="gradeSelect" class="form-select">
+                        <option value="">-- Select Grade --</option>
+                        <option value="Nursery">Nursery</option>
+                        <option value="Kinder">Kinder</option>
+                        <option value="1">Grade 1</option>
+                        <option value="2">Grade 2</option>
+                        <option value="3">Grade 3</option>
+                        <option value="4">Grade 4</option>
+                        <option value="5">Grade 5</option>
+                        <option value="6">Grade 6</option>
+                        <option value="7">Grade 7</option>
+                        <option value="8">Grade 8</option>
+                        <option value="9">Grade 9</option>
+                        <option value="10">Grade 10</option>
+                        <option value="11">Grade 11</option>
+                        <option value="12">Grade 12</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button id="exportPdfBtn" class="btn btn-danger">Export PDF</button>
+                    <button id="exportExcelBtn" class="btn btn-success">Export Excel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // JavaScript to handle export
+        document.getElementById('exportPdfBtn').onclick = function() {
+            const grade = document.getElementById('gradeSelect').value;
+            if (!grade) {
+                alert('Please select a grade.');
+                return;
+            }
+            window.location.href = `php_functions/export_grade_pdf.php?grade=${encodeURIComponent(grade)}`;
+        };
+
+        document.getElementById('exportExcelBtn').onclick = function() {
+            const grade = document.getElementById('gradeSelect').value;
+            if (!grade) {
+                alert('Please select a grade.');
+                return;
+            }
+            window.location.href = `php_functions/export_grade_excel.php?grade=${encodeURIComponent(grade)}`;
+        };
+    </script>
+
 
 </body>
 
