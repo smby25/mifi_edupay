@@ -50,7 +50,7 @@
     View Recent Transactions
   </button>
 
-  <button type="button" class="btn btn-danger" id="exportPdfBtn">
+  <button type="button" class="btn btn-danger" id="exportPaymentSummaryBtn">
     <i class="bi bi-file-earmark-pdf-fill me-1"></i> Export Payment Summary (PDF)
   </button>
 </div>
@@ -200,7 +200,7 @@
 
 
 <script>
-  document.getElementById("exportPdfBtn").addEventListener("click", function () {
+  document.getElementById("exportPaymentSummaryBtn").addEventListener("click", function () {
     const studentId = document.getElementById("modalStudentId").textContent.trim();
     if (studentId) {
       const link = document.createElement('a');

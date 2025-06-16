@@ -690,7 +690,7 @@ include "../conn.php";
                 </div>
                 <div class="modal-footer">
                     <button id="exportPdfBtn" class="btn btn-danger">Export PDF</button>
-                    <button id="exportExcelBtn" class="btn btn-success">Export Excel</button>
+                    <!-- <button id="exportExcelBtn" class="btn btn-success">Export Excel</button> -->
                 </div>
             </div>
         </div>
@@ -706,14 +706,14 @@ include "../conn.php";
             window.location.href = `php_functions/export_grade_pdf.php?grade=${encodeURIComponent(grade)}`;
         };
 
-        document.getElementById('exportExcelBtn').onclick = function() {
-            const grade = document.getElementById('gradeSelect').value;
-            if (!grade) {
-                alert('Please select a grade.');
-                return;
-            }
-            window.location.href = `php_functions/export_grade_excel.php?grade=${encodeURIComponent(grade)}`;
-        };
+        // document.getElementById('exportExcelBtn').onclick = function() {
+        //     const grade = document.getElementById('gradeSelect').value;
+        //     if (!grade) {
+        //         alert('Please select a grade.');
+        //         return;
+        //     }
+        //     window.location.href = `php_functions/export_grade_excel.php?grade=${encodeURIComponent(grade)}`;
+        // };
     </script>
 
 

@@ -14,7 +14,7 @@ class MYPDF extends TCPDF {
 
     public function Footer() {
         $this->SetY(-15); // 15 mm from bottom
-        $this->SetFont('helvetica', 'I', 9);
+        $this->SetFont('Arial', 'I', 9);
         $this->Cell(0, 10, 'Prepared by: ' . $this->preparedBy, 0, 0, 'L');
         $this->Cell(0, 10, 'Page ' . $this->getAliasNumPage() . '/' . $this->getAliasNbPages(), 0, 0, 'R');
     }
@@ -94,7 +94,7 @@ $payments_stmt->bind_param("iss", $student_id, $student['grade_level'], $student
 $payments_stmt->execute();
 $payments_result = $payments_stmt->get_result();
 
-$pdf->SetFont('helvetica', '', 10);
+$pdf->SetFont('Arial', '', 10);
 
 if ($payments_result->num_rows === 0) {
     $pdf->Cell(0, 10, 'No payments found.', 1, 1, 'C');

@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once('../../conn.php');
 require_once('../tcpdf/tcpdf.php');
 
@@ -8,18 +9,26 @@ if (!isset($_GET['grade']) || empty($_GET['grade'])) {
 
 $grade = $_GET['grade'];
 
+// Use fullname or fallback to username for footer
+$preparedBy = isset($_SESSION['fullname']) 
+    ? htmlspecialchars($_SESSION['fullname']) 
+    : (isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Unknown');
+
 // Extend TCPDF to customize the footer
 class MYPDF extends TCPDF {
+    public $preparedBy = '';
+
     public function Footer() {
-        $this->SetY(-15); // Position 15 mm from bottom
-        $this->SetFont('Arial', 'I', 8);
-        $this->Cell(0, 10, 'Page '.$this->getAliasNumPage().' of '.$this->getAliasNbPages(), 0, false, 'R');
+        $this->SetY(-15);
+        $this->SetFont('helvetica', 'I', 8);
+        $this->Cell(0, 10, 'Prepared by: ' . $this->preparedBy, 0, 0, 'L');
+        $this->Cell(0, 10, 'Page ' . $this->getAliasNumPage() . ' of ' . $this->getAliasNbPages(), 0, 0, 'R');
     }
 }
 
 // Create PDF
 $pdf = new MYPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-
+$pdf->preparedBy = $preparedBy;
 
 // Document Info
 $pdf->SetCreator('Student Ledger Export');
@@ -32,19 +41,17 @@ $pdf->AddPage();
 
 // Add image header
 $imagePath = '../assets/images/header/malindig_header_pdf.jpg';
-$pdf->Image($imagePath, 15, 10, 180, 30, '', '', 'T', false, 300); // 25mm height
+$pdf->Image($imagePath, 15, 10, 180, 30, '', '', 'T', false, 300);
 
-// Add space below image (image Y=10 + height 25 = 35)
+// Set Y below the header image
 $pdf->SetY(40);
 
-// Set font for title
+// Title
 $pdf->SetFont('Arial', 'B', 11);
 $pdf->Cell(0, 10, "Student Ledger - Grade $grade", 0, 1, 'C');
-
-// Add space before table
 $pdf->Ln(5);
 
-// Table Header and Style (with corrected column widths and alignment)
+// Table HTML
 $html = '<style>
             th {
                 background-color: #f2f2f2;
@@ -66,14 +73,12 @@ $html = '<style>
                 <tr>
                     <th width="40%"><b>Full Name</b></th>
                     <th width="40%"><b>Grade & Section / Strand</b></th>
-                    <th width="20%" style="text-align: center;"><b>Remaining Balance</b></th>
+                    <th width="20%"><b>Remaining Balance</b></th>
                 </tr>
             </thead>
             <tbody>';
 
-
-
-// Fetch students by grade
+// Fetch students
 $stmt = $conn->prepare("SELECT student_id, fname, mname, lname, section, strand FROM students WHERE grade_level = ? AND status = 'active' ORDER BY lname ASC");
 $stmt->bind_param("s", $grade);
 $stmt->execute();
@@ -83,11 +88,9 @@ while ($row = $result->fetch_assoc()) {
     $student_id = $row['student_id'];
     $full_name = $row['lname'] . ', ' . $row['fname'] . ' ' . strtoupper(substr($row['mname'], 0, 1)) . '.';
 
-    $section = $row['section'];
-    $strand = $row['strand'];
     $gradeSectionStrand = "Grade $grade";
-    if (!empty($section)) $gradeSectionStrand .= " - $section";
-    if (!empty($strand)) $gradeSectionStrand .= " | $strand";
+    if (!empty($row['section'])) $gradeSectionStrand .= " - " . $row['section'];
+    if (!empty($row['strand'])) $gradeSectionStrand .= " | " . $row['strand'];
 
     // Get balance
     $bal_stmt = $conn->prepare("
@@ -102,17 +105,16 @@ while ($row = $result->fetch_assoc()) {
     $balance = $bal_result->fetch_assoc()['balance'] ?? 0;
     $bal_stmt->close();
 
-$html .= '<tr>';
-$html .= '<td width="40%">' . htmlspecialchars($full_name) . '</td>';
-$html .= '<td width="40%">' . htmlspecialchars($gradeSectionStrand) . '</td>';
-$html .= '<td width="20%" style="text-align: right;">₱' . number_format($balance, 2) . '</td>';
-$html .= '</tr>';
-
+    $html .= '<tr>';
+    $html .= '<td width="40%">' . htmlspecialchars($full_name) . '</td>';
+    $html .= '<td width="40%">' . htmlspecialchars($gradeSectionStrand) . '</td>';
+    $html .= '<td width="20%" style="text-align: right;">₱' . number_format($balance, 2) . '</td>';
+    $html .= '</tr>';
 }
 
 $html .= '</tbody></table>';
 
-// Write table
+// Output content
 $pdf->writeHTML($html, true, false, true, false, '');
 
 // Output PDF
