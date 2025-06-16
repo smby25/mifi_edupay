@@ -20,7 +20,8 @@ $show_ledger = isset($_SESSION['usertype']) && in_array($_SESSION['usertype'], $
         <div class="d-flex align-items-start" style="margin-left: 10px;">
             <div class="logo" style="width: 220px;">
                 <a href="index.php">
-                    <img src="assets/css/img/malindig_header.png" alt="Logo" style="width: 100%; max-width: 400px; min-width: 180px;">
+                    <img src="assets/images/header/malindig_header.png" alt="Logo" style="width: 100%; max-width: 600px; min-width: 300px;">
+                    <!-- <img src="assets/css/img/malindig_header.png" alt="Logo" style="width: 100%; max-width: 400px; min-width: 180px;"> -->
                 </a>
             </div>
             <!-- <span class="ms-3 fw-bold fs-4" style="white-space: nowrap;">Malindig EduPay</span> -->
