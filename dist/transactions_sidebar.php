@@ -157,13 +157,15 @@ include "../conn.php";
                     $(document).ready(function() {
                         if (!$.fn.DataTable.isDataTable('#table1')) {
                             $('#table1').DataTable({
-                                "paging": false,
-                                "searching": true,
-                                "ordering": true,
-                                "info": false,
-                                "responsive": true,
-                                "autoWidth": false
-                            });
+    "paging": false,
+    "searching": true,
+    "ordering": true,
+    "info": false,
+    "responsive": true,
+    "autoWidth": false,
+    "order": [[4, "desc"]] // This sets default sort to 'Paid Date & By' column (index 4)
+});
+
                         }
                     });
                 </script>
@@ -241,20 +243,6 @@ include "../conn.php";
                     </div>
                 </div>
             </footer>
-            <!-- Success Modal
-            <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header bg-success text-white">
-                            <h5 class="modal-title" id="successModalLabel">Success</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            Student record has been successfully saved!
-                        </div>
-                    </div>
-                </div>
-            </div> -->
         </div>
     </div>
     <script src="assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
