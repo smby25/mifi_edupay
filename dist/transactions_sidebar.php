@@ -157,14 +157,16 @@ include "../conn.php";
                     $(document).ready(function() {
                         if (!$.fn.DataTable.isDataTable('#table1')) {
                             $('#table1').DataTable({
-    "paging": false,
-    "searching": true,
-    "ordering": true,
-    "info": false,
-    "responsive": true,
-    "autoWidth": false,
-    "order": [[4, "desc"]] // This sets default sort to 'Paid Date & By' column (index 4)
-});
+                                "paging": false,
+                                "searching": true,
+                                "ordering": true,
+                                "info": false,
+                                "responsive": true,
+                                "autoWidth": false,
+                                "order": [
+                                    [4, "desc"]
+                                ] // This sets default sort to 'Paid Date & By' column (index 4)
+                            });
 
                         }
                     });
