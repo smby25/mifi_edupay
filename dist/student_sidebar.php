@@ -103,20 +103,25 @@ include "../conn.php";
                                         <?php
                                         include '../conn.php';
                                         $query = "SELECT student_id, fname, mname, lname, lrn, grade_level, section, strand, status 
-                      FROM students 
-                      WHERE status = 'active' 
-                      ORDER BY lname ASC";
+                                            FROM students 
+                                            WHERE status = 'active' 
+                                            ORDER BY lname ASC";
                                         $result = $conn->query($query);
                                         while ($row = $result->fetch_assoc()) {
-                                            $full_name = $row['lname'] . ', ' . $row['fname'] . ' ' . strtoupper(substr($row['mname'], 0, 1)) . '.';
-                                            $grade_section_strand = htmlspecialchars($row['grade_level']) . ' - ' . htmlspecialchars($row['section']);
-                                            if (!empty($row['strand'])) {
-                                                $grade_section_strand .= ' / ' . htmlspecialchars($row['strand']);
-                                            }
-                                            echo "<tr>";
-                                            echo "<td style='display:none;'>" . htmlspecialchars($row['student_id']) . "</td>";
-                                            echo "<td style='display:none;'>" . htmlspecialchars($row['student_id']) . "</td>";
-                                            echo "<td>" . htmlspecialchars($full_name) . "</td>";
+                                                // Normalize each part to have first letter uppercase, rest lowercase
+                                                $lname = ucwords(strtolower($row['lname']));
+                                                $fname = ucwords(strtolower($row['fname']));
+                                                $mname = ucwords(strtolower($row['mname']));
+                                                $middle_initial = !empty($mname) ? strtoupper(substr($mname, 0, 1)) . '.' : '';
+                                                $full_name = $lname . ', ' . $fname . ' ' . $middle_initial;
+                                                $grade_section_strand = htmlspecialchars($row['grade_level']) . ' - ' . htmlspecialchars($row['section']);
+                                                if (!empty($row['strand'])) {
+                                                        $grade_section_strand .= ' / ' . htmlspecialchars($row['strand']);
+                                                }
+                                                echo "<tr>";
+                                                echo "<td style='display:none;'>" . htmlspecialchars($row['student_id']) . "</td>";
+                                                echo "<td style='display:none;'>" . htmlspecialchars($row['student_id']) . "</td>";
+                                                echo "<td>" . htmlspecialchars($full_name) . "</td>";
                                             echo "<td>" . htmlspecialchars($row['lrn']) . "</td>";
                                             echo "<td>" . $grade_section_strand . "</td>";
                                             echo "<td style='display:none;'>" . htmlspecialchars($row['status']) . "</td>";
