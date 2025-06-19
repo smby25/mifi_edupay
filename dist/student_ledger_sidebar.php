@@ -58,13 +58,13 @@ include "../conn.php";
                         <h3>Student Ledger</h3>
                     </div>
                 </div>
-                <div class="col-auto">
+                <!-- <div class="col-auto">
                     <button type="button" class="btn btn-success btn-s rounded-pill shadow-sm d-flex align-items-center gap-2"
                         data-bs-toggle="modal" data-bs-target="#addStudentModal">
                         <i class="bi bi-person-plus-fill"></i>
                         Add Student
                     </button>
-                </div>
+                </div> -->
             </div>
 
             <!-- Filter Dropdown (left) and Export Button (right) in 1 Row -->
@@ -116,7 +116,24 @@ include "../conn.php";
                                 if (!empty($strand)) $grade_section_strand .= " | " . htmlspecialchars($strand);
 
                                 // Get remaining balance
-                                $bal_stmt = $conn->prepare("SELECT IFNULL((SELECT SUM(p.amount) FROM payments p WHERE p.target_grade = ? OR p.student_id = ?), 0) - IFNULL((SELECT SUM(sp.amount_paid) FROM student_payments sp WHERE sp.student_id = ?), 0) AS balance");
+                                $bal_stmt = $conn->prepare("
+                                    SELECT 
+                                        IFNULL((
+                                            SELECT SUM(p.amount)
+                                            FROM payments p
+                                            WHERE (p.target_grade = ? OR p.student_id = ?)
+                                            AND p.status = 'active'
+                                        ), 0)
+                                        -
+                                        IFNULL((
+                                            SELECT SUM(sp.amount_paid)
+                                            FROM student_payments sp
+                                            JOIN students s ON sp.student_id = s.student_id
+                                            WHERE sp.student_id = ?
+                                            AND s.status = 'active'
+                                        ), 0) AS balance
+                                ");
+
                                 $bal_stmt->bind_param("sii", $grade, $student_id, $student_id);
                                 $bal_stmt->execute();
                                 $bal_result = $bal_stmt->get_result();
@@ -153,34 +170,60 @@ include "../conn.php";
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script>
-        $(document).ready(function () {
-            var table = $('#table1').DataTable({
-                paging: true,
-                searching: true,
-                ordering: true,
-                info: true,
-                responsive: true,
-                autoWidth: false,
-                order: [[1, 'asc']] // Sort by Full Name (lname first)
-            });
-
-            // Populate dropdown filter
-            var uniqueValues = {};
-            table.column(2).data().each(function (d) {
-                uniqueValues[d] = true;
-            });
-            $.each(Object.keys(uniqueValues).sort(), function (i, v) {
-                $('#gradeSectionStrandFilter').append('<option value="' + v + '">' + v + '</option>');
-            });
-
-            // Filter when dropdown changes
-            $('#gradeSectionStrandFilter').on('change', function () {
-                var val = $(this).val();
-                table.search('').columns().search(''); // Reset global + column search
-                table.column(2).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
-            });
+    $(document).ready(function () {
+        var table = $('#table1').DataTable({
+            paging: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            responsive: true,
+            autoWidth: false,
+            order: [[1, 'asc']] // Sort by Full Name (lname first)
         });
-    </script>
+
+        // Populate filter dropdown with unique values from Grade & Section / Strand column
+        var uniqueValues = {};
+        table.column(2).data().each(function (d) {
+            uniqueValues[d] = true;
+        });
+        $.each(Object.keys(uniqueValues).sort(), function (i, v) {
+            $('#gradeSectionStrandFilter').append('<option value="' + v + '">' + v + '</option>');
+        });
+
+        // Filter by Grade & Section / Strand
+        $('#gradeSectionStrandFilter').on('change', function () {
+            var val = $(this).val();
+            table.search('').columns().search('');
+            table.column(2).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
+        });
+
+        // ✅ View button event handler (event delegation)
+        $(document).on('click', '.view-student-btn', function () {
+            const studentId = $(this).data('id');
+            const fullName = $(this).data('name');
+            const grade = $(this).data('grade');
+            const section = $(this).data('section');
+            const balance = $(this).data('balance');
+
+            // Show the data in your modal (update according to your modal content)
+            console.log("Student ID:", studentId);
+            console.log("Name:", fullName);
+            console.log("Grade:", grade);
+            console.log("Section:", section);
+            console.log("Balance:", balance);
+
+            // Example: Fill modal fields (replace with your actual modal element IDs)
+            $('#studentName').text(fullName);
+            $('#studentGrade').text(grade);
+            $('#studentSection').text(section);
+            $('#studentBalance').text('₱' + parseFloat(balance).toFixed(2));
+
+            // Show the modal (if using Bootstrap)
+            $('#studentModal').modal('show');
+        });
+    });
+</script>
+
     <style>
         .table td,
         .table th {
@@ -209,7 +252,7 @@ include "../conn.php";
                 <!-- Student Payment Info Modal -->
                 <script>
                     $(document).ready(function() {
-                        $('.view-student-btn').on('click', function() {
+                       $('#table1 tbody').on('click', '.view-student-btn', function() {
                             const studentId = $(this).data('id');
                             const studentName = $(this).data('name');
                             const grade = $(this).data('grade');
