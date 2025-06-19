@@ -68,164 +68,143 @@ include "../conn.php";
             </div>
 
             <!-- Filter Dropdown (left) and Export Button (right) in 1 Row -->
-            <div class="mb-2 d-flex align-items-center justify-content-between flex-wrap">
-                <div>
-                    <select id="gradeSectionStrandFilter" class="form-select" style="width:auto;display:inline-block;">
-                        <option value="">All</option>
-                    </select>
-                </div>
-                <div>
-                    <button class="btn btn-outline-success d-flex align-items-center gap-2 rounded-pill shadow-sm px-3"
-                        data-bs-toggle="modal" data-bs-target="#exportModal">
-                        <i class="bi bi-download"></i>
-                        Export by Grade
-                    </button>
+<div class="mb-2 d-flex align-items-center justify-content-between flex-wrap">
+    <div>
+        <select id="gradeSectionStrandFilter" class="form-select" style="width:auto;display:inline-block;">
+            <option value="">All</option>
+        </select>
+    </div>
+    <div>
+        <button class="btn btn-outline-success d-flex align-items-center gap-2 rounded-pill shadow-sm px-3"
+            data-bs-toggle="modal" data-bs-target="#exportModal">
+            <i class="bi bi-download"></i>
+            Export by Grade
+        </button>
+    </div>
+</div>
+<!-- Datatable -->
+<div class="table-responsive">
+    <section class="section">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped" id="table1" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th style="display:none;">Student ID</th>
+                                <th>Full Name</th>
+                                <th>Grade &amp; Section / Strand</th>
+                                <th>Remaining Balance</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="small-font-table">
+                            <?php
+                            include '../conn.php';
+                            $query = "SELECT student_id, fname, mname, lname, grade_level, section, strand FROM students WHERE status = 'active' ORDER BY lname ASC";
+                            $result = $conn->query($query);
+
+                            while ($row = $result->fetch_assoc()) {
+                                $student_id = $row['student_id'];
+                                $full_name = $row['lname'] . ', ' . $row['fname'] . ' ' . strtoupper(substr($row['mname'], 0, 1)) . '.';
+                                $grade = $row['grade_level'];
+                                $section = $row['section'];
+                                $strand = $row['strand'] ?? '';
+
+                                $grade_section_strand = "Grade " . htmlspecialchars($grade);
+                                if (!empty($section)) $grade_section_strand .= " - " . htmlspecialchars($section);
+                                if (!empty($strand)) $grade_section_strand .= " | " . htmlspecialchars($strand);
+
+                                // Get remaining balance
+                                $bal_stmt = $conn->prepare("SELECT IFNULL((SELECT SUM(p.amount) FROM payments p WHERE p.target_grade = ? OR p.student_id = ?), 0) - IFNULL((SELECT SUM(sp.amount_paid) FROM student_payments sp WHERE sp.student_id = ?), 0) AS balance");
+                                $bal_stmt->bind_param("sii", $grade, $student_id, $student_id);
+                                $bal_stmt->execute();
+                                $bal_result = $bal_stmt->get_result();
+                                $balance = $bal_result->fetch_assoc()['balance'] ?? 0;
+                                $bal_stmt->close();
+
+                                echo "<tr>";
+                                echo "<td style='display:none;'>" . htmlspecialchars($student_id) . "</td>";
+                                echo "<td>" . htmlspecialchars($full_name) . "</td>";
+                                echo "<td>" . $grade_section_strand . "</td>";
+                                echo "<td>₱" . number_format($balance, 2) . "</td>";
+                                echo "<td>
+                                    <button type='button' class='btn btn-primary btn-sm view-student-btn' 
+                                        data-id='" . htmlspecialchars($student_id) . "'
+                                        data-name='" . htmlspecialchars($full_name) . "'
+                                        data-grade='" . htmlspecialchars($grade) . "'
+                                        data-section='" . htmlspecialchars($section) . "'
+                                        data-balance='" . $balance . "'>
+                                        <i class='bi bi-eye'></i> View
+                                    </button>
+                                  </td>";
+                                echo "</tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <!-- Datatable -->
-            <div class="table-responsive">
-                <section class="section">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-striped" id="table1" style="width:100%;">
-                                    <thead>
-                                        <tr>
-                                            <th style="display:none;">Student ID</th>
-                                            <th>Full Name</th>
-                                            <th>Grade &amp; Section / Strand</th>
-                                            <th>Remaining Balance</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="small-font-table">
-                                        <?php
-                                        $limit = 10;
-                                        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-                                        $offset = ($page - 1) * $limit;
+        </div>
+    </section>
 
-                                        // Only select students with status = 'active'
-                                        $query = "SELECT SQL_CALC_FOUND_ROWS student_id, fname, mname, lname, grade_level, section, strand 
-                                                  FROM students 
-                                                  WHERE status = 'active'
-                                                  LIMIT ?, ?";
-                                        $stmt = $conn->prepare($query);
-                                        $stmt->bind_param("ii", $offset, $limit);
-                                        $stmt->execute();
-                                        $result = $stmt->get_result();
+    <!-- Scripts -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var table = $('#table1').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                responsive: true,
+                autoWidth: false,
+                order: [[1, 'asc']] // Sort by Full Name (lname first)
+            });
 
-                                        while ($row = $result->fetch_assoc()) {
-                                            $student_id = $row['student_id'];
-                                            $full_name = $row['lname'] . ', ' . $row['fname'] . ' ' . strtoupper(substr($row['mname'], 0, 1)) . '.';
-                                            $grade = $row['grade_level'];
-                                            $section = $row['section'];
-                                            $strand = $row['strand'] ?? '';
+            // Populate dropdown filter
+            var uniqueValues = {};
+            table.column(2).data().each(function (d) {
+                uniqueValues[d] = true;
+            });
+            $.each(Object.keys(uniqueValues).sort(), function (i, v) {
+                $('#gradeSectionStrandFilter').append('<option value="' + v + '">' + v + '</option>');
+            });
 
-                                            // Combine Grade, Section, Strand
-                                            $grade_section_strand = "Grade " . htmlspecialchars($grade);
-                                            if (!empty($section)) {
-                                                $grade_section_strand .= " - " . htmlspecialchars($section);
-                                            }
-                                            if (!empty($strand)) {
-                                                $grade_section_strand .= " | " . htmlspecialchars($strand);
-                                            }
+            // Filter when dropdown changes
+            $('#gradeSectionStrandFilter').on('change', function () {
+                var val = $(this).val();
+                table.search('').columns().search(''); // Reset global + column search
+                table.column(2).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
+            });
+        });
+    </script>
+    <style>
+        .table td,
+        .table th {
+            white-space: normal !important;
+            word-break: break-word;
+            vertical-align: middle;
+        }
 
-                                            // Get remaining balance (total fees - payments)
-                                            $balance_query = "
-    SELECT 
-        IFNULL((
-            SELECT SUM(p.amount)
-            FROM payments p
-            WHERE p.target_grade = ? OR p.student_id = ?
-        ), 0)
-        -
-        IFNULL((
-            SELECT SUM(sp.amount_paid)
-            FROM student_payments sp
-            WHERE sp.student_id = ?
-        ), 0) AS balance
-";
-                                            $bal_stmt = $conn->prepare($balance_query);
-                                            $bal_stmt->bind_param("sii", $grade, $student_id, $student_id);
-                                            $bal_stmt->execute();
-                                            $bal_result = $bal_stmt->get_result();
-                                            $balance = $bal_result->fetch_assoc()['balance'] ?? 0;
-                                            $bal_stmt->close();
+        @media (max-width: 575.98px) {
+            .card-body {
+                padding: 0.5rem !important;
+            }
 
+            .table-responsive {
+                margin: 0 -10px;
+            }
 
-                                            echo "<tr>";
-                                            echo "<td style='display:none;'>" . htmlspecialchars($student_id) . "</td>";
-                                            echo "<td>" . htmlspecialchars($full_name) . "</td>";
-                                            echo "<td>" . $grade_section_strand . "</td>";
-                                            echo "<td>₱" . number_format($balance, 2) . "</td>";
-                                            echo "<td>
-        <button type='button' class='btn btn-primary btn-sm view-student-btn' 
-            data-id='" . htmlspecialchars($student_id) . "'
-            data-name='" . htmlspecialchars($full_name) . "'
-            data-grade='" . htmlspecialchars($grade) . "'
-            data-section='" . htmlspecialchars($section) . "'
-            data-balance='" . $balance . "'> <!-- NO number_format here -->
-            <i class='bi bi-eye'></i> View
-        </button>
-      </td>";
-                                            echo "</tr>";
-                                        }
-                                        $stmt->close();
-                                        $resultTotal = $conn->query("SELECT FOUND_ROWS() AS total");
-                                        $totalRows = $resultTotal->fetch_assoc()['total'];
-                                        $totalPages = ceil($totalRows / $limit);
-                                        ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <!-- Pagination -->
-                            <ul class="pagination pagination-primary">
-                                <li class="page-item <?php echo ($page <= 1) ? 'disabled' : ''; ?>">
-                                    <a class="page-link" href="?page=<?php echo $page - 1; ?>">Prev</a>
-                                </li>
-                                <?php for ($j = 1; $j <= $totalPages; $j++): ?>
-                                    <li class="page-item <?php echo ($page == $j) ? 'active' : ''; ?>">
-                                        <a class="page-link" href="?page=<?php echo $j; ?>"><?php echo $j; ?></a>
-                                    </li>
-                                <?php endfor; ?>
-                                <li class="page-item <?php echo ($page >= $totalPages) ? 'disabled' : ''; ?>">
-                                    <a class="page-link" href="?page=<?php echo $page + 1; ?>">Next</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-                <!-- Optional: DataTables for search/sort only, no paging -->
-                <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-                <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-                <script>
-                    $(document).ready(function() {
-                        var table = $('#table1').DataTable({
-                            "paging": false,
-                            "searching": true,
-                            "ordering": true,
-                            "info": false,
-                            "responsive": true,
-                            "autoWidth": false
-                        });
+            .pagination {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</div>
 
-                        // Populate the dropdown with unique values from the Grade/Section/Strand column (index 2)
-                        var uniqueValues = {};
-                        table.column(2).data().each(function(d) {
-                            uniqueValues[d] = true;
-                        });
-                        $.each(Object.keys(uniqueValues).sort(), function(i, v) {
-                            $('#gradeSectionStrandFilter').append('<option value="' + v + '">' + v + '</option>');
-                        });
-
-                        // Filter table when dropdown changes
-                        $('#gradeSectionStrandFilter').on('change', function() {
-                            var val = $(this).val();
-                            table.column(2).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
-                        });
-                    });
-                </script>
 
                 <!-- Student Payment Info Modal -->
                 <script>
