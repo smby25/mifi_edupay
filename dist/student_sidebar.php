@@ -27,7 +27,7 @@ include "../conn.php";
     <link rel="shortcut icon" href="assets/images/favicon.svg" type="image/x-icon">
     <link rel="icon" type="image/png" href="assets/css/img/malindig_logo.png">
 
-        <!-- <style>
+    <!-- <style>
         body,
         html {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
@@ -101,17 +101,12 @@ include "../conn.php";
                                     </thead>
                                     <tbody class="small-font-table">
                                         <?php
-                                        $limit = 10;
-                                        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-                                        $offset = ($page - 1) * $limit;
-
-                                        $query = "SELECT SQL_CALC_FOUND_ROWS student_id, fname, mname, lname, lrn, grade_level, section, strand, status FROM students WHERE status = 'active' LIMIT ?, ?";
-                                        $stmt = $conn->prepare($query);
-                                        $stmt->bind_param("ii", $offset, $limit);
-                                        $stmt->execute();
-                                        $result = $stmt->get_result();
-                                        $i = $offset + 1;
-
+                                        include '../conn.php';
+                                        $query = "SELECT student_id, fname, mname, lname, lrn, grade_level, section, strand, status 
+                      FROM students 
+                      WHERE status = 'active' 
+                      ORDER BY lname ASC";
+                                        $result = $conn->query($query);
                                         while ($row = $result->fetch_assoc()) {
                                             $full_name = $row['lname'] . ', ' . $row['fname'] . ' ' . strtoupper(substr($row['mname'], 0, 1)) . '.';
                                             $grade_section_strand = htmlspecialchars($row['grade_level']) . ' - ' . htmlspecialchars($row['section']);
@@ -119,86 +114,68 @@ include "../conn.php";
                                                 $grade_section_strand .= ' / ' . htmlspecialchars($row['strand']);
                                             }
                                             echo "<tr>";
-                                            echo "<td style='display:none;'>" . htmlspecialchars($row['student_id']) . "</td>"; // old hidden ID
-                                            echo "<td style='display:none;'>" . htmlspecialchars($row['student_id']) . "</td>"; // new hidden Student ID column
+                                            echo "<td style='display:none;'>" . htmlspecialchars($row['student_id']) . "</td>";
+                                            echo "<td style='display:none;'>" . htmlspecialchars($row['student_id']) . "</td>";
                                             echo "<td>" . htmlspecialchars($full_name) . "</td>";
                                             echo "<td>" . htmlspecialchars($row['lrn']) . "</td>";
                                             echo "<td>" . $grade_section_strand . "</td>";
                                             echo "<td style='display:none;'>" . htmlspecialchars($row['status']) . "</td>";
                                             echo "<td>
-                                    <button type='button' class='btn btn-primary btn-sm view-student-btn' data-id='" . htmlspecialchars($row['student_id']) . "'>
-                                        <i class='bi bi-eye'></i>
-                                    </button>
-                                    <button type='button' class='btn btn-danger btn-sm delete-student-btn ms-1' data-id='" . htmlspecialchars($row['student_id']) . "'>
-                                        <i class='bi bi-trash'></i>
-                                    </button>
-                                </td>";
+                    <button type='button' class='btn btn-primary btn-sm view-student-btn' data-id='" . htmlspecialchars($row['student_id']) . "'>
+                        <i class='bi bi-eye'></i>
+                    </button>
+                    <button type='button' class='btn btn-danger btn-sm delete-student-btn ms-1' data-id='" . htmlspecialchars($row['student_id']) . "'>
+                        <i class='bi bi-trash'></i>
+                    </button>
+                </td>";
                                             echo "</tr>";
-                                            $i++;
                                         }
-
-                                        $stmt->close();
-
-                                        // Pagination
-                                        $resultTotal = $conn->query("SELECT FOUND_ROWS() AS total");
-                                        $totalRows = $resultTotal->fetch_assoc()['total'];
-                                        $totalPages = ceil($totalRows / $limit);
+                                        $result->close();
                                         ?>
                                     </tbody>
                                 </table>
                             </div>
-                            <!-- Pagination -->
-                            <ul class="pagination pagination-primary">
-                                <li class="page-item <?php echo ($page <= 1) ? 'disabled' : ''; ?>">
-                                    <a class="page-link" href="?page=<?php echo $page - 1; ?>">Prev</a>
-                                </li>
-                                <?php for ($j = 1; $j <= $totalPages; $j++): ?>
-                                    <li class="page-item <?php echo ($page == $j) ? 'active' : ''; ?>">
-                                        <a class="page-link" href="?page=<?php echo $j; ?>"><?php echo $j; ?></a>
-                                    </li>
-                                <?php endfor; ?>
-                                <li class="page-item <?php echo ($page >= $totalPages) ? 'disabled' : ''; ?>">
-                                    <a class="page-link" href="?page=<?php echo $page + 1; ?>">Next</a>
-                                </li>
-                            </ul>
                         </div>
                     </div>
                 </section>
-                <!-- Optional: DataTables for search/sort only, no paging -->
+                <!-- Scripts -->
                 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
                 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
                 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
                 <script>
                     $(document).ready(function() {
-                        if (!$.fn.DataTable.isDataTable('#table1')) {
-                            var table = $('#table1').DataTable({
-                                "paging": false,
-                                "searching": true,
-                                "ordering": true,
-                                "info": false,
-                                "responsive": true,
-                                "autoWidth": false
-                            });
+                        var table = $('#table1').DataTable({
+                            paging: true,
+                            searching: true,
+                            ordering: true,
+                            info: true,
+                            responsive: true,
+                            autoWidth: false,
+                            order: [
+                                [2, 'asc']
+                            ] // Column index 2 is "Name" (which contains lname first)
+                        });
 
-                            // Populate the dropdown with unique values from the Grade/Section/Strand column (index 2)
-                            var uniqueValues = {};
-                            table.column(4).data().each(function(d) {
-                                uniqueValues[d] = true;
-                            });
-                            $.each(Object.keys(uniqueValues).sort(), function(i, v) {
-                                $('#gradeSectionStrandFilter').append('<option value="' + v + '">' + v + '</option>');
-                            });
 
-                            // Filter table when dropdown changes
-                            $('#gradeSectionStrandFilter').on('change', function() {
-                                var val = $(this).val();
-                                table.column(2).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
-                            });
-                        }
+                        // Populate dropdown filter
+                        var uniqueValues = {};
+                        table.column(4).data().each(function(d) {
+                            uniqueValues[d] = true;
+                        });
+                        $.each(Object.keys(uniqueValues).sort(), function(i, v) {
+                            $('#gradeSectionStrandFilter').append('<option value="' + v + '">' + v + '</option>');
+                        });
+
+                        // Filter when dropdown changes
+                        $('#gradeSectionStrandFilter').on('change', function() {
+                            var val = $(this).val();
+                            table.column(4).search(val ? '^' + $.fn.dataTable.util.escapeRegex(val) + '$' : '', true, false).draw();
+                        });
                     });
                 </script>
+
                 <style>
-                    /* Ensure table text wraps and doesn't overflow on small screens */
                     .table td,
                     .table th {
                         white-space: normal !important;
@@ -445,21 +422,21 @@ include "../conn.php";
         });
     </script>
 
-<!-- Duplicate student Modal -->
-<?php if (isset($_GET['duplicate']) && $_GET['duplicate'] == 1): ?>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        Swal.fire({
-            icon: 'error',
-            title: 'Duplicate Student',
-            text: 'A student with the same name and LRN already exists.',
-            confirmButtonColor: '#3085d6'
-        });
-        // Automatically open the Add Student modal
-        $('#addStudentModal').modal('show');
-    });
-</script>
-<?php endif; ?>
+    <!-- Duplicate student Modal -->
+    <?php if (isset($_GET['duplicate']) && $_GET['duplicate'] == 1): ?>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Duplicate Student',
+                    text: 'A student with the same name and LRN already exists.',
+                    confirmButtonColor: '#3085d6'
+                });
+                // Automatically open the Add Student modal
+                $('#addStudentModal').modal('show');
+            });
+        </script>
+    <?php endif; ?>
 
 
 </body>
