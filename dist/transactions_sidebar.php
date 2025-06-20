@@ -92,12 +92,16 @@ include "../conn.php";
                                         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
                                         $offset = ($page - 1) * $limit;
 
-                                        $query = "SELECT sp.id, s.student_id, s.fname, s.mname, s.lname, s.lrn, s.grade_level, s.section, s.strand, p.payment_type, sp.amount_paid, sp.date_paid, sp.description
-                                                    FROM student_payments sp
-                                                    JOIN students s ON sp.student_id = s.student_id
-                                                    JOIN payments p ON sp.payment_id = p.id
-                                                    ORDER BY sp.date_paid DESC
-                                                    LIMIT ?, ?";
+                                        $query = "SELECT sp.id, s.student_id, 
+                                            CONCAT(UCASE(LEFT(s.fname,1)), LCASE(SUBSTRING(s.fname,2))) AS fname, 
+                                            CONCAT(UCASE(LEFT(s.mname,1)), LCASE(SUBSTRING(s.mname,2))) AS mname, 
+                                            CONCAT(UCASE(LEFT(s.lname,1)), LCASE(SUBSTRING(s.lname,2))) AS lname, 
+                                            s.lrn, s.grade_level, s.section, s.strand, p.payment_type, sp.amount_paid, sp.date_paid, sp.description
+                                            FROM student_payments sp
+                                            JOIN students s ON sp.student_id = s.student_id
+                                            JOIN payments p ON sp.payment_id = p.id
+                                            ORDER BY sp.date_paid DESC
+                                            LIMIT ?, ?";
                                         $stmt = $conn->prepare($query);
                                         $stmt->bind_param("ii", $offset, $limit);
                                         $stmt->execute();

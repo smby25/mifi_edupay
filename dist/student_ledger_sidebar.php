@@ -100,8 +100,15 @@ include "../conn.php";
                                     </thead>
                                     <tbody class="small-font-table">
                                         <?php
-                                        include '../conn.php';
-                                        $query = "SELECT student_id, fname, mname, lname, grade_level, section, strand FROM students WHERE status = 'active' ORDER BY lname ASC";
+                                        
+                                        $query = "SELECT student_id, 
+                                                         CONCAT(UCASE(LEFT(lname,1)), LCASE(SUBSTRING(lname,2))) AS lname, 
+                                                         CONCAT(UCASE(LEFT(fname,1)), LCASE(SUBSTRING(fname,2))) AS fname, 
+                                                         CONCAT(UCASE(LEFT(mname,1)), LCASE(SUBSTRING(mname,2))) AS mname, 
+                                                         grade_level, section, strand 
+                                                  FROM students 
+                                                  WHERE status = 'active' 
+                                                  ORDER BY lname ASC";
                                         $result = $conn->query($query);
 
                                         while ($row = $result->fetch_assoc()) {
