@@ -7,11 +7,11 @@ $show_all = isset($_GET['all']) && $_GET['all'] === 'true';
 $data = [];
 
 if ($student_id) {
-    $sql = "SELECT sp.date_paid, p.payment_type, sp.amount_paid, sp.paid_by
+    $sql = "SELECT sp.date_paid, p.payment_type, sp.amount_paid, sp.description
             FROM student_payments sp
             JOIN payments p ON sp.payment_id = p.id
             WHERE sp.student_id = ?
-            ORDER BY sp.date_paid DESC";
+            ORDER BY sp.date_paid ASC";
     
     if (!$show_all) {
         $sql .= " LIMIT 10";

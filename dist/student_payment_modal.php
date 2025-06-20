@@ -41,19 +41,19 @@
           </table>
         </div>
 
-<div class="d-flex justify-content-between align-items-center mt-3">
-  <button class="btn btn-outline-primary d-flex align-items-center gap-2"
-          data-bs-toggle="modal"
-          data-bs-target="#recentTransactionsModal"
-          id="viewRecentTransactionsBtn">
-    <i class="bi bi-clock-history"></i>
-    View Recent Transactions
-  </button>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <button class="btn btn-outline-primary d-flex align-items-center gap-2"
+            data-bs-toggle="modal"
+            data-bs-target="#recentTransactionsModal"
+            id="viewRecentTransactionsBtn">
+            <i class="bi bi-clock-history"></i>
+            View Recent Transactions
+          </button>
 
-  <button type="button" class="btn btn-danger" id="exportPaymentSummaryBtn">
-    <i class="bi bi-file-earmark-pdf-fill me-1"></i> Export Payment Summary (PDF)
-  </button>
-</div>
+          <button type="button" class="btn btn-danger" id="exportPaymentSummaryBtn">
+            <i class="bi bi-file-earmark-pdf-fill me-1"></i> Export Payment Summary (PDF)
+          </button>
+        </div>
 
       </div>
       <div class="modal-footer">
@@ -81,9 +81,17 @@
           <input type="number" class="form-control" id="payAmount" min="1" step="any">
         </div>
         <div class="mb-3">
+          <label for="payDescription" class="form-label">Description</label>
+          <input type="text" class="form-control" id="payDescription" placeholder="Enter payment description (optional)">
+        </div>
+        <div class="mb-3">
+          <label for="payDate" class="form-label">Date Paid</label>
+          <input type="date" class="form-control" id="payDate">
+        </div>
+        <!-- <div class="mb-3">
           <label for="paidBy" class="form-label">Paid By</label>
           <input type="text" class="form-control" id="paidBy" placeholder="Enter payer's name">
-        </div>
+        </div> -->
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -104,12 +112,12 @@
       <div class="modal-body">
         <div class="table-responsive">
           <table class="table table-bordered align-middle">
-            <thead class="table-light"></thead>
+            <thead class="table-light">
               <tr>
                 <th>Date Paid</th>
                 <th>Payment Type</th>
                 <th>Amount Paid</th>
-                <th>Paid By</th>
+                <th>Description</th>
               </tr>
             </thead>
             <tbody id="recentTransactionsTable">
@@ -118,13 +126,9 @@
           </table>
         </div>
         <div class="d-flex justify-content-end mt-3">
-<button class="btn btn-primary" id="seeAllTransactionsBtn">
-  See all transactions
-</button>
-
-
-
-
+          <button class="btn btn-primary" id="seeAllTransactionsBtn">
+            See all transactions
+          </button>
         </div>
       </div>
       <div class="modal-footer justify-content-center">
@@ -135,6 +139,7 @@
     </div>
   </div>
 </div>
+
 
 <!-- SweetAlert2 for Overpayment Warning -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -166,7 +171,7 @@
               <td>${transaction.date_paid}</td>
               <td>${transaction.payment_type}</td>
               <td>${transaction.amount_paid}</td>
-              <td>${transaction.paid_by}</td>
+              <td>${transaction.description}</td>
             </tr>
           `;
           tableBody.innerHTML += row;
@@ -177,30 +182,86 @@
       });
   }
 
-  // Event: View Recent Transactions button in student modal
-  document.getElementById("viewRecentTransactionsBtn").addEventListener("click", function () {
-    currentStudentId = document.getElementById("modalStudentId").textContent.trim();
-    if (currentStudentId) {
-      showingAll = false;
-      loadTransactions(currentStudentId, false); // Load recent 10
-      document.getElementById("seeAllTransactionsBtn").textContent = "See all transactions";
-    }
-  });
+  // Attach event listeners only once
+document.getElementById("viewRecentTransactionsBtn").addEventListener("click", function() {
+  currentStudentId = document.getElementById("modalStudentId").textContent.trim();
+  if (currentStudentId) {
+    showingAll = false;
+    loadTransactions(currentStudentId, false); // Load recent 10
+    document.getElementById("seeAllTransactionsBtn").textContent = "See all transactions";
+  }
+});
 
-  // Toggle all/recent transactions
-  document.getElementById("seeAllTransactionsBtn").addEventListener("click", function () {
-    if (!currentStudentId) return;
+// Only attach once!
+document.getElementById("seeAllTransactionsBtn").addEventListener("click", function() {
+  if (!currentStudentId) return;
 
-    showingAll = !showingAll;
-    loadTransactions(currentStudentId, showingAll);
+  showingAll = !showingAll;
+  loadTransactions(currentStudentId, showingAll);
 
-    this.textContent = showingAll ? "Show less" : "See all transactions";
-  });
+  this.textContent = showingAll ? "Show less" : "See all transactions";
+});
+
+
+function formatDateTime(dateStr) {
+  // Handles both "YYYY-MM-DD" and "YYYY-MM-DD HH:MM:SS"
+  if (!dateStr) return '-';
+  const dateObj = new Date(dateStr.replace(/-/g, '/')); // Safari compatibility
+  if (isNaN(dateObj)) return dateStr;
+
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  const datePart = dateObj.toLocaleDateString('en-US', options);
+
+  let hours = dateObj.getHours();
+  let minutes = dateObj.getMinutes().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // 0 => 12
+  const timePart = hours + ':' + minutes + ampm;
+
+  // If time is 00:00, don't show time
+  if (dateObj.getHours() === 0 && dateObj.getMinutes() === 0) {
+    return datePart;
+  }
+  return `${datePart} | ${timePart}`;
+}
+
+function loadTransactions(studentId, showAll = false) {
+  const url = `php_functions/get_recent_transactions.php?student_id=${studentId}${showAll ? '&all=true' : ''}`;
+
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      const tableBody = document.getElementById("recentTransactionsTable");
+      tableBody.innerHTML = '';
+
+      if (data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="4" class="text-center">No transactions found.</td></tr>';
+        return;
+      }
+
+      data.forEach(transaction => {
+        const row = `
+          <tr>
+            <td>${formatDateTime(transaction.date_paid)}</td>
+            <td>${transaction.payment_type}</td>
+            <td>₱${parseFloat(transaction.amount_paid).toLocaleString()}</td>
+            <td>${transaction.description ? transaction.description : '-'}</td>
+          </tr>
+        `;
+        tableBody.innerHTML += row;
+      });
+    })
+    .catch(error => {
+      console.error('Error loading transactions:', error);
+    });
+}
 </script>
 
 
+
 <script>
-  document.getElementById("exportPaymentSummaryBtn").addEventListener("click", function () {
+  document.getElementById("exportPaymentSummaryBtn").addEventListener("click", function() {
     const studentId = document.getElementById("modalStudentId").textContent.trim();
     if (studentId) {
       const link = document.createElement('a');
