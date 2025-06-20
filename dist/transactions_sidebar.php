@@ -67,29 +67,37 @@ include "../conn.php";
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-striped" id="table1" style="width:100%;">
+                                    <colgroup>
+                                        <col style="display:none;">
+                                        <col style="display:none;">
+                                        <col style="width:30%;">
+                                        <col style="width:15%;">
+                                        <col style="width:35%;">
+                                        <col style="width:20%;">
+                                    </colgroup>
                                     <thead>
                                         <tr>
                                             <th style="display:none;">ID</th>
                                             <th style="display:none;">Student ID</th>
                                             <th>Student Info</th>
                                             <th>Payment Type</th>
-                                            <th>Paid Date &amp; By</th>
+                                            <th>Paid Date &amp; Description</th>
                                             <th>Amount</th>
-                                            <!-- <th>Action</th> -->
                                         </tr>
                                     </thead>
+
                                     <tbody class="small-font-table">
                                         <?php
                                         $limit = 10;
                                         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
                                         $offset = ($page - 1) * $limit;
 
-                                        $query = "SELECT sp.id, s.student_id, s.fname, s.mname, s.lname, s.lrn, s.grade_level, s.section, s.strand, p.payment_type, sp.amount_paid, sp.date_paid, sp.paid_by
-              FROM student_payments sp
-              JOIN students s ON sp.student_id = s.student_id
-              JOIN payments p ON sp.payment_id = p.id
-              ORDER BY sp.date_paid DESC
-              LIMIT ?, ?";
+                                        $query = "SELECT sp.id, s.student_id, s.fname, s.mname, s.lname, s.lrn, s.grade_level, s.section, s.strand, p.payment_type, sp.amount_paid, sp.date_paid, sp.description
+                                                    FROM student_payments sp
+                                                    JOIN students s ON sp.student_id = s.student_id
+                                                    JOIN payments p ON sp.payment_id = p.id
+                                                    ORDER BY sp.date_paid DESC
+                                                    LIMIT ?, ?";
                                         $stmt = $conn->prepare($query);
                                         $stmt->bind_param("ii", $offset, $limit);
                                         $stmt->execute();
@@ -103,16 +111,17 @@ include "../conn.php";
                                                 "Grade: " . htmlspecialchars($row['grade_level']) . " | " .
                                                 "Section: " . htmlspecialchars($row['section']) . "<br>" .
                                                 "Strand: " . htmlspecialchars($row['strand']);
-                                            $paid_date_by = date('M d, Y h:ia', strtotime($row['date_paid'])) .
-                                                '<br><span class="text-muted small">by: ' .
-                                                (!empty($row['paid_by']) ? htmlspecialchars($row['paid_by']) : '-') .
+                                            $paid_date_description = date('M d, Y h:ia', strtotime($row['date_paid'])) .
+                                                '<br><span class="text-muted small">Description: ' .
+                                                (!empty($row['description']) ? htmlspecialchars($row['description']) : '') .
                                                 '</span>';
+
                                             echo "<tr>";
                                             echo "<td style='display:none;'>" . htmlspecialchars($row['id']) . "</td>"; // Transaction ID
                                             echo "<td style='display:none;'>" . htmlspecialchars($row['student_id']) . "</td>"; // Student ID
                                             echo "<td>" . $student_info . "</td>";
                                             echo "<td>" . htmlspecialchars($row['payment_type']) . "</td>";
-                                            echo "<td>" . $paid_date_by . "</td>";
+                                            echo "<td>" . $paid_date_description . "</td>";
                                             echo "<td>₱" . number_format($row['amount_paid'], 2) . "</td>";
                                             // echo "<td>
                                             //     <button type='button' class='btn btn-primary btn-sm view-student-btn' data-id='" . htmlspecialchars($row['student_id']) . "'>
@@ -164,7 +173,7 @@ include "../conn.php";
                                 "responsive": true,
                                 "autoWidth": false,
                                 "order": [
-                                    [4, "desc"]
+                                    [3, "desc"]
                                 ] // This sets default sort to 'Paid Date & By' column (index 4)
                             });
 
