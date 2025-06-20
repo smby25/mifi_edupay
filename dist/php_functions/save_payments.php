@@ -45,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $amt = floatval($amounts[0]);
 
         $stmt = $conn->prepare("UPDATE payments SET batch_name=?, target_grade=?, student_id=?, payment_type=?, amount=? WHERE id=?");
-        $stmt->bind_param("sss sdi", $batch_name, $target_grade, $student_id, $type, $amt, $payment_id);
+        $stmt->bind_param("ssissi", $batch_name, $target_grade, $student_id, $type, $amt, $payment_id);
         $stmt->execute();
         $stmt->close();
 
