@@ -118,7 +118,11 @@ include "../conn.php";
                                             $section = $row['section'];
                                             $strand = $row['strand'] ?? '';
 
-                                            $grade_section_strand = "Grade " . htmlspecialchars($grade);
+                                            if (strtolower($grade) === 'nursery' || strtolower($grade) === 'kinder') {
+                                                $grade_section_strand = htmlspecialchars($grade);
+                                            } else {
+                                                $grade_section_strand = "Grade " . htmlspecialchars($grade);
+                                            }
                                             if (!empty($section)) $grade_section_strand .= " - " . htmlspecialchars($section);
                                             if (!empty($strand)) $grade_section_strand .= " | " . htmlspecialchars($strand);
 
@@ -190,13 +194,55 @@ include "../conn.php";
                             ] // Sort by Full Name (lname first)
                         });
 
+                        // Define the desired grade order
+                        var gradeOrder = [
+                            "Nursery",
+                            "Kinder",
+                            "Grade 1",
+                            "Grade 2",
+                            "Grade 3",
+                            "Grade 4",
+                            "Grade 5",
+                            "Grade 6",
+                            "Grade 7",
+                            "Grade 8",
+                            "Grade 9",
+                            "Grade 10",
+                            "Grade 11",
+                            "Grade 12"
+                        ];
+
                         // Populate filter dropdown with unique values from Grade & Section / Strand column
                         var uniqueValues = {};
                         table.column(2).data().each(function(d) {
                             uniqueValues[d] = true;
                         });
-                        $.each(Object.keys(uniqueValues).sort(), function(i, v) {
-                            $('#gradeSectionStrandFilter').append('<option value="' + v + '">' + v + '</option>');
+
+                        // Group unique values by grade prefix for custom ordering
+                        var grouped = {};
+                        Object.keys(uniqueValues).forEach(function(v) {
+                            var match = v.match(/^([A-Za-z ]+\d*|Nursery|Kinder)/);
+                            var grade = match ? match[0].trim() : v;
+                            if (!grouped[grade]) grouped[grade] = [];
+                            grouped[grade].push(v);
+                        });
+
+                        // Append options in the specified grade order
+                        gradeOrder.forEach(function(grade) {
+                            if (grouped[grade]) {
+                                grouped[grade].sort().forEach(function(val) {
+                                    $('#gradeSectionStrandFilter').append('<option value="' + val + '">' + val + '</option>');
+                                });
+                            }
+                        });
+
+                        // Add any remaining unmatched values at the end
+                        Object.keys(grouped).forEach(function(grade) {
+                            if (gradeOrder.indexOf(grade) === -1) {
+                                grouped[grade].sort().forEach(function(val) {
+                                    $('#gradeSectionStrandFilter').append('<option value="' + val + '">' + val + '</option>');
+                                });
+                            }
                         });
 
                         // Filter by Grade & Section / Strand
