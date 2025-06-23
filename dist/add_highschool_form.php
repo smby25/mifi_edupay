@@ -100,7 +100,7 @@
                         <select class="form-select" id="gradeLevelSelect" name="grade_level" required>
                             <option value="" disabled selected>Select</option>
                             <option value="Nursery">Nursery</option>
-                            <option value="Kindery">Kindery</option>
+                            <option value="Kindery">Kinder</option>
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option value="3">3</option>
@@ -142,6 +142,7 @@
                             <option>ABM</option>
                             <option>GAS</option>
                             <option>TVL</option>
+                            <option>CSS</option>
                             <option>Others</option>
                         </select>
                     </div>
