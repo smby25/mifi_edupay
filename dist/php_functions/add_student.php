@@ -29,8 +29,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $student_type = clean_input($_POST['student_type']);
     $school_year = clean_input($_POST['school_year']);
     $strand = isset($_POST['strand']) ? clean_input($_POST['strand']) : null;
-    $prev_school = clean_input($_POST['prev_school']);
-    $general_avg = clean_input($_POST['general_avg']);
+    $esc_stat = clean_input($_POST['esc_stat']); // changed from prev_school
+    $scholar = isset($_POST['scholar']) ? clean_input($_POST['scholar']) : null;  // changed from general_avg
 
     $father_name = clean_input($_POST['father_name']);
     $father_occupation = clean_input($_POST['father_occupation']);
@@ -46,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt = $conn->prepare("UPDATE students SET 
                 fname=?, mname=?, lname=?, suffix=?, dbirth=?, sex=?,
                 complete_address=?, barangay=?, city_municipality=?, province=?, zipcode=?, mobile_num=?, email=?,
-                lrn=?, grade_level=?, section=?, student_type=?, school_year=?, strand=?, prev_school=?, general_avg=?,
+                lrn=?, grade_level=?, section=?, student_type=?, school_year=?, strand=?, esc_stat=?, scholar=?,
                 father_name=?, father_occupation=?, mother_name=?, mother_occupation=?, guardian=?, guardian_relationship=?, guardian_contact=?
                 WHERE student_id=?
             ");
@@ -55,7 +55,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 "ssssssssssssssssssssssssssssi",
                 $fname, $mname, $lname, $suffix, $dbirth, $sex,
                 $complete_address, $barangay, $city_municipality, $province, $zipcode, $mobile_num, $email,
-                $lrn, $grade_level, $section, $student_type, $school_year, $strand, $prev_school, $general_avg,
+                $lrn, $grade_level, $section, $student_type, $school_year, $strand, $esc_stat, $scholar,
                 $father_name, $father_occupation, $mother_name, $mother_occupation, $guardian, $guardian_relationship, $guardian_contact,
                 $student_id
             );
@@ -76,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt = $conn->prepare("INSERT INTO students (
                 fname, mname, lname, suffix, dbirth, sex,
                 complete_address, barangay, city_municipality, province, zipcode, mobile_num, email,
-                lrn, grade_level, section, student_type, school_year, strand, prev_school, general_avg,
+                lrn, grade_level, section, student_type, school_year, strand, esc_stat, scholar,
                 father_name, father_occupation, mother_name, mother_occupation, guardian, guardian_relationship, guardian_contact
             ) VALUES (
                 ?, ?, ?, ?, ?, ?,
@@ -89,7 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 "ssssssssssssssssssssssssssss",
                 $fname, $mname, $lname, $suffix, $dbirth, $sex,
                 $complete_address, $barangay, $city_municipality, $province, $zipcode, $mobile_num, $email,
-                $lrn, $grade_level, $section, $student_type, $school_year, $strand, $prev_school, $general_avg,
+                $lrn, $grade_level, $section, $student_type, $school_year, $strand, $esc_stat, $scholar,
                 $father_name, $father_occupation, $mother_name, $mother_occupation, $guardian, $guardian_relationship, $guardian_contact
             );
         }

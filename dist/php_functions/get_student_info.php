@@ -188,14 +188,14 @@ if (isset($_GET['id'])) {
                         </div>
                         <div class="col-md-4">
                             <div class="form-floating">
-                                <input type="text" readonly class="form-control-plaintext" value="<?= htmlspecialchars($row['prev_school']) ?>">
-                                <label>Previous School</label>
+                                <input type="text" readonly class="form-control-plaintext" value="<?= htmlspecialchars($row['esc_stat']) ?>">
+                                <label>ESC Status</label>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-floating">
-                                <input type="text" readonly class="form-control-plaintext" value="<?= htmlspecialchars($row['general_avg']) ?>">
-                                <label>General Average</label>
+                                <input type="text" readonly class="form-control-plaintext" value="<?= htmlspecialchars($row['scholar']) ?>">
+                                <label>Scholar</label>
                             </div>
                         </div>
                     </div>
@@ -311,8 +311,8 @@ if (isset($_GET['id'])) {
                 $('#addStudentModal select[name="student_type"]').val(data.student_type);
                 $('#addStudentModal input[name="school_year"]').val(data.school_year);
                 $('#addStudentModal select[name="strand"]').val(data.strand);
-                $('#addStudentModal input[name="prev_school"]').val(data.prev_school);
-                $('#addStudentModal input[name="general_avg"]').val(data.general_avg);
+                $('#addStudentModal select[name="esc_stat"]').val(data.esc_stat);
+                $('#addStudentModal select[name="scholar"]').val(data.scholar);
                 $('#addStudentModal input[name="father_name"]').val(data.father_name);
                 $('#addStudentModal input[name="father_occupation"]').val(data.father_occupation);
                 $('#addStudentModal input[name="mother_name"]').val(data.mother_name);
@@ -320,6 +320,15 @@ if (isset($_GET['id'])) {
                 $('#addStudentModal input[name="guardian"]').val(data.guardian);
                 $('#addStudentModal input[name="guardian_relationship"]').val(data.guardian_relationship);
                 $('#addStudentModal input[name="guardian_contact"]').val(data.guardian_contact);
+
+                    // Scholar logic
+    if (data.scholar && data.scholar.trim() !== "" && data.scholar !== "No") {
+        $('#addStudentModal select[name="scholar_select"]').val("Yes");
+        $('#addStudentModal #scholarTextbox').removeClass("d-none").val(data.scholar).prop("required", true);
+    } else {
+        $('#addStudentModal select[name="scholar_select"]').val("No");
+        $('#addStudentModal #scholarTextbox').addClass("d-none").val("").prop("required", false);
+    }
 
                 $('#addStudentModal').modal('show');
             }

@@ -128,10 +128,12 @@
                             <option>Balik-Aral</option>
                         </select>
                     </div>
-                    <div class="col-md-4">
+                    <!-- <div class="col-md-4">
                         <label class="form-label">School Year</label>
                         <input type="text" class="form-control" name="school_year" placeholder="e.g., 2024-2025">
-                    </div>
+                    </div> -->
+                    <input type="hidden" class="form-control" name="school_year" value="2025-2026">
+
                     <!-- WRAPPER WITH ID -->
                     <div class="col-md-4 d-none" id="strandWrapper">
                         <label class="form-label">Strand</label>
@@ -146,14 +148,49 @@
                             <option>Others</option>
                         </select>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Previous School Attended</label>
-                        <input type="text" class="form-control" name="prev_school">
+                    <div class="col-md-4">
+                        <label class="form-label">ESC Status <span class="text-danger">*</span></label>
+                        <select class="form-select" name="esc_stat" required>
+                            <option value="" disabled selected>Select</option>
+                            <option value="ESC">ESC</option>
+                            <option value="NON-ESC">NON-ESC</option>
+                            <option value="ESC/ALUMNI SCHOLAR">ESC/ALUMNI SCHOLAR</option>
+                        </select>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">General Average</label>
-                        <input type="text" class="form-control" name="general_avg">
+                    <div class="col-md-4">
+                        <label class="form-label">Scholar <span class="text-danger">*</span></label>
+                        <select class="form-select" name="scholar_select" id="scholarSelect" required>
+                            <option value="" disabled selected>Select</option>
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                        <input type="text" class="form-control mt-2 d-none" name="scholar" id="scholarTextbox" placeholder="Enter scholarship details" autocomplete="off">
                     </div>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function() {
+                            const scholarSelect = document.getElementById("scholarSelect");
+                            const scholarTextbox = document.getElementById("scholarTextbox");
+
+                            scholarSelect.addEventListener("change", function() {
+                                if (this.value === "Yes") {
+                                    scholarTextbox.classList.remove("d-none");
+                                    scholarTextbox.required = true;
+                                } else {
+                                    scholarTextbox.classList.add("d-none");
+                                    scholarTextbox.value = "";
+                                    scholarTextbox.required = false;
+                                }
+                            });
+
+                            // On form submit, if "No" is selected, clear the scholar textbox value
+                            scholarSelect.form.addEventListener("submit", function() {
+                                if (scholarSelect.value !== "Yes") {
+                                    scholarTextbox.value = "";
+                                }
+                            });
+                        });
+                    </script>
+
                 </div>
 
                 <!-- Section: Family Background -->
@@ -232,7 +269,7 @@
         });
 
         // Listen for modal show event
-        $('#addStudentModal').on('show.bs.modal', function () {
+        $('#addStudentModal').on('show.bs.modal', function() {
             setTimeout(function() { // Wait for fields to be populated
                 if (studentIdInput.value) {
                     submitBtn.textContent = "Update Student";
@@ -243,10 +280,8 @@
         });
 
         // Optional: Reset button text when modal is hidden
-        $('#addStudentModal').on('hidden.bs.modal', function () {
+        $('#addStudentModal').on('hidden.bs.modal', function() {
             submitBtn.textContent = "Add Student";
         });
     });
 </script>
-
-
