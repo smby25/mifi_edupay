@@ -306,6 +306,8 @@ include "../conn.php";
         });
     </script>
 
+    
+
     <!-- Strand Required -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -335,26 +337,25 @@ include "../conn.php";
     </script>
 
     <script>
-        $(document).ready(function() {
-            $('.view-student-btn').on('click', function() {
-                var studentId = $(this).data('id');
-                $('#studentInfoBody').html('<div class="text-center text-muted">Loading...</div>');
-                $('#studentInfoModal').modal('show');
-                $.ajax({
-                    url: 'php_functions/get_student_info.php',
-                    type: 'GET',
-                    data: {
-                        id: studentId
-                    },
-                    success: function(response) {
-                        $('#studentInfoBody').html(response);
-                    },
-                    error: function() {
-                        $('#studentInfoBody').html('<div class="text-danger">Failed to load student info.</div>');
-                    }
-                });
+        $(document).on('click', '.view-student-btn', function() {
+            var studentId = $(this).data('id');
+            $('#studentInfoBody').html('<div class="text-center text-muted">Loading...</div>');
+            $('#studentInfoModal').modal('show');
+            $.ajax({
+                url: 'php_functions/get_student_info.php',
+                type: 'GET',
+                data: {
+                    id: studentId
+                },
+                success: function(response) {
+                    $('#studentInfoBody').html(response);
+                },
+                error: function() {
+                    $('#studentInfoBody').html('<div class="text-danger">Failed to load student info.</div>');
+                }
             });
         });
+    
     </script>
     <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
         <script>
