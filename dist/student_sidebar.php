@@ -159,17 +159,60 @@ include "../conn.php";
                             autoWidth: false,
                             order: [
                                 [2, 'asc']
-                            ] // Column index 2 is "Name" (which contains lname first)
+                            ] // Column index 2 is "Name"
                         });
 
+                        // Define the desired order
+                        var gradeOrder = [
+                            "Nursery",
+                            "Kinder",
+                            "Grade 1",
+                            "Grade 2",
+                            "Grade 3",
+                            "Grade 4",
+                            "Grade 5",
+                            "Grade 6",
+                            "Grade 7",
+                            "Grade 8",
+                            "Grade 9",
+                            "Grade 10",
+                            "Grade 11",
+                            "Grade 12"
+                        ];
 
-                        // Populate dropdown filter
+                        // Collect unique values from column 4
                         var uniqueValues = {};
                         table.column(4).data().each(function(d) {
                             uniqueValues[d] = true;
                         });
-                        $.each(Object.keys(uniqueValues).sort(), function(i, v) {
-                            $('#gradeSectionStrandFilter').append('<option value="' + v + '">' + v + '</option>');
+
+                        // Group values by grade prefix
+                        var grouped = {};
+                        $.each(Object.keys(uniqueValues), function(i, v) {
+                            // Extract grade prefix (e.g., "Grade 1", "Kinder", etc.)
+                            var prefix = v.split(' - ')[0].trim();
+                            if (!grouped[prefix]) grouped[prefix] = [];
+                            grouped[prefix].push(v);
+                        });
+
+                        // Add options in the desired order
+                        gradeOrder.forEach(function(grade) {
+                            if (grouped[grade]) {
+                                grouped[grade].sort(); // Sort by section/strand
+                                grouped[grade].forEach(function(val) {
+                                    $('#gradeSectionStrandFilter').append('<option value="' + val + '">' + val + '</option>');
+                                });
+                            }
+                        });
+
+                        // Add any remaining (unmatched) options
+                        Object.keys(grouped).forEach(function(grade) {
+                            if (gradeOrder.indexOf(grade) === -1) {
+                                grouped[grade].sort();
+                                grouped[grade].forEach(function(val) {
+                                    $('#gradeSectionStrandFilter').append('<option value="' + val + '">' + val + '</option>');
+                                });
+                            }
                         });
 
                         // Filter when dropdown changes
