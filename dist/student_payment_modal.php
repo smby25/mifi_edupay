@@ -16,7 +16,7 @@
         <p><strong>Student Name:</strong> <span id="modalStudentName"></span></p>
         <p><strong>Grade & Section:</strong> <span id="modalGradeSection"></span></p>
         <p><strong>ESC Status:</strong> <span id="modalEscStat"></span><br></p>
-        <p><strong>Scholar:</strong> <span id="modalScholar"></span></p>
+        <p><strong>Under the scholarship of:</strong> <span id="modalScholar"></span></p>
 
         <div class="alert alert-success mt-3" style="background-color: #3EAA49; color: #fff; border-color: #3EAA49;">
           <strong>Balance as of <span id="modalBalanceDate"></span>:</strong><br>

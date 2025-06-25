@@ -27,7 +27,7 @@ if (!isset($_GET['student_id']) || empty($_GET['student_id'])) {
 $student_id = $_GET['student_id'];
 
 // Fetch student info
-$stmt = $conn->prepare("SELECT fname, mname, lname, grade_level, section, strand FROM students WHERE student_id = ?");
+$stmt = $conn->prepare("SELECT fname, mname, lname, grade_level, section, strand, esc_stat, scholar FROM students WHERE student_id = ?");
 $stmt->bind_param("i", $student_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -41,6 +41,22 @@ $fullName = $student['lname'] . ', ' . $student['fname'] . ' ' . strtoupper(subs
 $gradeInfo = "Grade " . $student['grade_level'];
 if (!empty($student['section'])) $gradeInfo .= " - " . $student['section'];
 if (!empty($student['strand'])) $gradeInfo .= " | " . $student['strand'];
+
+// Build ESC/Scholar info only if at least one is present
+$escScholarInfo = '';
+if (!empty($student['esc_stat'])) {
+    $escScholarInfo .= 'ESC';
+}
+if (!empty($student['scholar'])) {
+    if (!empty($escScholarInfo)) {
+        $escScholarInfo .= ' | ';
+    }
+    $escScholarInfo .= 'Under the Scholarship of ' . htmlspecialchars($student['scholar']);
+}
+
+// If both are empty, don't show the row later
+$showEscScholarInfo = !empty($escScholarInfo);
+
 
 // Create PDF
 $pdf = new MYPDF();
@@ -69,10 +85,11 @@ $pdf->Ln(5);
 $pdf->SetFont('helvetica', '', 11);
 $pdf->Cell(0, 8, $fullName, 0, 1);
 $pdf->Cell(0, 8, $gradeInfo, 0, 1);
+$pdf->Cell(0, 8, $escScholarInfo, 0, 1);
 $pdf->Ln(5);
 
 // Payment Table Header
-$pdf->SetFont('helvetica', 'B', 11);
+$pdf->SetFont('arial', 'B', 11);
 $pdf->SetFillColor(230, 230, 230);
 $pdf->Cell(70, 10, 'Payment Type', 1, 0, 'C', 1);
 $pdf->Cell(50, 10, 'Total Amount', 1, 0, 'C', 1);
