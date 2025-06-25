@@ -95,17 +95,19 @@ include "../conn.php";
                                             <th>Full Name</th>
                                             <th>Grade &amp; Section / Strand</th>
                                             <th>Remaining Balance</th>
+                                            <th style="display:none;">ESC Status</th>
+                                            <th style="display:none;">Scholar</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody class="small-font-table">
                                         <?php
-                                        
+
                                         $query = "SELECT student_id, 
                                                          CONCAT(UCASE(LEFT(lname,1)), LCASE(SUBSTRING(lname,2))) AS lname, 
                                                          CONCAT(UCASE(LEFT(fname,1)), LCASE(SUBSTRING(fname,2))) AS fname, 
                                                          CONCAT(UCASE(LEFT(mname,1)), LCASE(SUBSTRING(mname,2))) AS mname, 
-                                                         grade_level, section, strand 
+                                                         grade_level, section, strand, esc_stat, scholar
                                                   FROM students 
                                                   WHERE status = 'active' 
                                                   ORDER BY lname ASC";
@@ -117,6 +119,8 @@ include "../conn.php";
                                             $grade = $row['grade_level'];
                                             $section = $row['section'];
                                             $strand = $row['strand'] ?? '';
+                                            $esc_stat = $row['esc_stat'] ?? '';
+                                            $scholar = $row['scholar'] ?? '';
 
                                             if (strtolower($grade) === 'nursery' || strtolower($grade) === 'kinder') {
                                                 $grade_section_strand = htmlspecialchars($grade);
@@ -156,12 +160,16 @@ include "../conn.php";
                                             echo "<td>" . htmlspecialchars($full_name) . "</td>";
                                             echo "<td>" . $grade_section_strand . "</td>";
                                             echo "<td>₱" . number_format($balance, 2) . "</td>";
+                                            echo "<td style='display:none;'>" . htmlspecialchars($esc_stat) . "</td>";
+                                            echo "<td style='display:none;'>" . htmlspecialchars($scholar) . "</td>";
                                             echo "<td>
                                     <button type='button' class='btn btn-primary btn-sm view-student-btn' 
                                         data-id='" . htmlspecialchars($student_id) . "'
                                         data-name='" . htmlspecialchars($full_name) . "'
                                         data-grade='" . htmlspecialchars($grade) . "'
                                         data-section='" . htmlspecialchars($section) . "'
+                                        data-esc_stat='" . htmlspecialchars($esc_stat) . "'
+                                        data-scholar='" . htmlspecialchars($scholar) . "'
                                         data-balance='" . $balance . "'>
                                         <i class='bi bi-eye'></i> View
                                     </button>
@@ -258,6 +266,8 @@ include "../conn.php";
                             const fullName = $(this).data('name');
                             const grade = $(this).data('grade');
                             const section = $(this).data('section');
+                            const escStat = $(this).data('esc_stat') || '';
+                            const scholar = $(this).data('scholar') || '';
                             const balance = $(this).data('balance');
 
                             // Show the data in your modal (update according to your modal content)
@@ -271,6 +281,8 @@ include "../conn.php";
                             $('#studentName').text(fullName);
                             $('#studentGrade').text(grade);
                             $('#studentSection').text(section);
+                            $('#modalEscStat').text(escStat);
+                            $('#modalScholar').text(scholar);
                             $('#studentBalance').text('₱' + parseFloat(balance).toFixed(2));
 
                             // Show the modal (if using Bootstrap)
@@ -510,7 +522,7 @@ include "../conn.php";
                 confirmButtonText: 'Okay'
             });
         }
-        
+
 
         $(document).on('click', '#confirmPayBtn', function(e) {
             var studentId = $('#modalStudentId').text();
@@ -594,45 +606,49 @@ include "../conn.php";
 
 
     <script>
-  $(document).on('click', '.btn-outline-primary', function () {
-    var studentId = $('#modalStudentId').text();
-    $('#recentTransactionsTable').html('<tr><td colspan="4" class="text-center">Loading...</td></tr>');
-    $('#recentTransactionsModal').modal('show');
+        $(document).on('click', '.btn-outline-primary', function() {
+            var studentId = $('#modalStudentId').text();
+            $('#recentTransactionsTable').html('<tr><td colspan="4" class="text-center">Loading...</td></tr>');
+            $('#recentTransactionsModal').modal('show');
 
-    $.ajax({
-      url: 'php_functions/get_recent_transactions.php',
-      type: 'GET',
-      data: {
-        student_id: studentId
-      },
-      dataType: 'json',
-      success: function (data) {
-        if (data.length > 0) {
-          var rows = '';
-          data.forEach(function (item) {
-            // Format date_paid as "July 25, 2025"
-            var dateObj = new Date(item.date_paid.replace(/-/g, '/')); // Safari-compatible
-            var options = { year: 'numeric', month: 'long', day: 'numeric' };
-            var formattedDate = dateObj.toLocaleDateString('en-US', options);
+            $.ajax({
+                url: 'php_functions/get_recent_transactions.php',
+                type: 'GET',
+                data: {
+                    student_id: studentId
+                },
+                dataType: 'json',
+                success: function(data) {
+                    if (data.length > 0) {
+                        var rows = '';
+                        data.forEach(function(item) {
+                            // Format date_paid as "July 25, 2025"
+                            var dateObj = new Date(item.date_paid.replace(/-/g, '/')); // Safari-compatible
+                            var options = {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            };
+                            var formattedDate = dateObj.toLocaleDateString('en-US', options);
 
-            rows += '<tr>' +
-              '<td>' + formattedDate + '</td>' +
-              '<td>' + item.payment_type + '</td>' +
-              '<td>₱' + parseFloat(item.amount_paid).toLocaleString() + '</td>' +
-              '<td>' + (item.description ? item.description : '-') + '</td>' +
-              '</tr>';
-          });
-          $('#recentTransactionsTable').html(rows);
-        } else {
-          $('#recentTransactionsTable').html('<tr><td colspan="4" class="text-center text-muted">No transactions found.</td></tr>');
-        }
-      },
-      error: function () {
-        $('#recentTransactionsTable').html('<tr><td colspan="4" class="text-center text-danger">Error loading transactions.</td></tr>');
-      }
-    });
-  });
-</script>
+                            rows += '<tr>' +
+                                '<td>' + formattedDate + '</td>' +
+                                '<td>' + item.payment_type + '</td>' +
+                                '<td>₱' + parseFloat(item.amount_paid).toLocaleString() + '</td>' +
+                                '<td>' + (item.description ? item.description : '-') + '</td>' +
+                                '</tr>';
+                        });
+                        $('#recentTransactionsTable').html(rows);
+                    } else {
+                        $('#recentTransactionsTable').html('<tr><td colspan="4" class="text-center text-muted">No transactions found.</td></tr>');
+                    }
+                },
+                error: function() {
+                    $('#recentTransactionsTable').html('<tr><td colspan="4" class="text-center text-danger">Error loading transactions.</td></tr>');
+                }
+            });
+        });
+    </script>
 
 
     <!-- Export Modal -->

@@ -11,10 +11,12 @@
       </div>
       <div class="modal-body">
         <!-- Modal Content Starts Here -->
-        <h6><strong>Student Information</strong></h6>
+        <!-- <h6><strong>Student Information</strong></h6> -->
         <p style="display:none;"><strong>Student ID:</strong> <span id="modalStudentId"></span></p>
         <p><strong>Student Name:</strong> <span id="modalStudentName"></span></p>
         <p><strong>Grade & Section:</strong> <span id="modalGradeSection"></span></p>
+        <p><strong>ESC Status:</strong> <span id="modalEscStat"></span><br></p>
+        <p><strong>Scholar:</strong> <span id="modalScholar"></span></p>
 
         <div class="alert alert-success mt-3" style="background-color: #3EAA49; color: #fff; border-color: #3EAA49;">
           <strong>Balance as of <span id="modalBalanceDate"></span>:</strong><br>
@@ -183,65 +185,69 @@
   }
 
   // Attach event listeners only once
-document.getElementById("viewRecentTransactionsBtn").addEventListener("click", function() {
-  currentStudentId = document.getElementById("modalStudentId").textContent.trim();
-  if (currentStudentId) {
-    showingAll = false;
-    loadTransactions(currentStudentId, false); // Load recent 10
-    document.getElementById("seeAllTransactionsBtn").textContent = "See all transactions";
+  document.getElementById("viewRecentTransactionsBtn").addEventListener("click", function() {
+    currentStudentId = document.getElementById("modalStudentId").textContent.trim();
+    if (currentStudentId) {
+      showingAll = false;
+      loadTransactions(currentStudentId, false); // Load recent 10
+      document.getElementById("seeAllTransactionsBtn").textContent = "See all transactions";
+    }
+  });
+
+  // Only attach once!
+  document.getElementById("seeAllTransactionsBtn").addEventListener("click", function() {
+    if (!currentStudentId) return;
+
+    showingAll = !showingAll;
+    loadTransactions(currentStudentId, showingAll);
+
+    this.textContent = showingAll ? "Show less" : "See all transactions";
+  });
+
+
+  function formatDateTime(dateStr) {
+    // Handles both "YYYY-MM-DD" and "YYYY-MM-DD HH:MM:SS"
+    if (!dateStr) return '-';
+    const dateObj = new Date(dateStr.replace(/-/g, '/')); // Safari compatibility
+    if (isNaN(dateObj)) return dateStr;
+
+    const options = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    };
+    const datePart = dateObj.toLocaleDateString('en-US', options);
+
+    let hours = dateObj.getHours();
+    let minutes = dateObj.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'pm' : 'am';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // 0 => 12
+    const timePart = hours + ':' + minutes + ampm;
+
+    // If time is 00:00, don't show time
+    if (dateObj.getHours() === 0 && dateObj.getMinutes() === 0) {
+      return datePart;
+    }
+    return `${datePart} | ${timePart}`;
   }
-});
 
-// Only attach once!
-document.getElementById("seeAllTransactionsBtn").addEventListener("click", function() {
-  if (!currentStudentId) return;
+  function loadTransactions(studentId, showAll = false) {
+    const url = `php_functions/get_recent_transactions.php?student_id=${studentId}${showAll ? '&all=true' : ''}`;
 
-  showingAll = !showingAll;
-  loadTransactions(currentStudentId, showingAll);
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const tableBody = document.getElementById("recentTransactionsTable");
+        tableBody.innerHTML = '';
 
-  this.textContent = showingAll ? "Show less" : "See all transactions";
-});
+        if (data.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="4" class="text-center">No transactions found.</td></tr>';
+          return;
+        }
 
-
-function formatDateTime(dateStr) {
-  // Handles both "YYYY-MM-DD" and "YYYY-MM-DD HH:MM:SS"
-  if (!dateStr) return '-';
-  const dateObj = new Date(dateStr.replace(/-/g, '/')); // Safari compatibility
-  if (isNaN(dateObj)) return dateStr;
-
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  const datePart = dateObj.toLocaleDateString('en-US', options);
-
-  let hours = dateObj.getHours();
-  let minutes = dateObj.getMinutes().toString().padStart(2, '0');
-  const ampm = hours >= 12 ? 'pm' : 'am';
-  hours = hours % 12;
-  hours = hours ? hours : 12; // 0 => 12
-  const timePart = hours + ':' + minutes + ampm;
-
-  // If time is 00:00, don't show time
-  if (dateObj.getHours() === 0 && dateObj.getMinutes() === 0) {
-    return datePart;
-  }
-  return `${datePart} | ${timePart}`;
-}
-
-function loadTransactions(studentId, showAll = false) {
-  const url = `php_functions/get_recent_transactions.php?student_id=${studentId}${showAll ? '&all=true' : ''}`;
-
-  fetch(url)
-    .then(response => response.json())
-    .then(data => {
-      const tableBody = document.getElementById("recentTransactionsTable");
-      tableBody.innerHTML = '';
-
-      if (data.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="4" class="text-center">No transactions found.</td></tr>';
-        return;
-      }
-
-      data.forEach(transaction => {
-        const row = `
+        data.forEach(transaction => {
+          const row = `
           <tr>
             <td>${formatDateTime(transaction.date_paid)}</td>
             <td>${transaction.payment_type}</td>
@@ -249,13 +255,13 @@ function loadTransactions(studentId, showAll = false) {
             <td>${transaction.description ? transaction.description : '-'}</td>
           </tr>
         `;
-        tableBody.innerHTML += row;
+          tableBody.innerHTML += row;
+        });
+      })
+      .catch(error => {
+        console.error('Error loading transactions:', error);
       });
-    })
-    .catch(error => {
-      console.error('Error loading transactions:', error);
-    });
-}
+  }
 </script>
 
 
