@@ -523,6 +523,62 @@ include "../conn.php";
             });
         }
 
+        function reloadStudentPaymentInfo(studentId, grade, section) {
+            // Set modal header details (optional, if you want to update them)
+            // $('#modalStudentId').text(studentId);
+            // $('#modalGradeSection').text(`Grade - ${grade} | ${section}`);
+
+            // Get updated balance and payment types
+            $.ajax({
+                url: 'php_functions/get_payment_types.php',
+                method: 'GET',
+                data: {
+                    grade: grade,
+                    student_id: studentId
+                },
+                dataType: 'json',
+                success: function(data) {
+                    let rows = '';
+                    let totalBalance = 0;
+                    if (data.length > 0) {
+                        data.forEach(item => {
+                            const paymentAmount = parseFloat(item.amount) || 0;
+                            const remainingAmount = parseFloat(item.remaining) || 0;
+                            totalBalance += remainingAmount;
+
+                            rows += `
+                        <tr>
+                            <td style="display:none;">${studentId}</td>
+                            <td style="display:none;">${item.id}</td>
+                            <td>${item.payment_type}</td>
+                            <td>₱${paymentAmount.toLocaleString()}</td>
+                            <td>₱${remainingAmount.toLocaleString()}</td>
+                            <td>
+                                <button type="button"
+                                    class="btn btn-success btn-sm pay-btn pay-row-btn"
+                                    data-payment_type="${item.payment_type}"
+                                    data-amount="${paymentAmount}"
+                                    data-remaining="${remainingAmount}"
+                                    data-student_id="${studentId}"
+                                    data-payment_id="${item.id}">
+                                    <i class="bi bi-cash"></i> Pay
+                                </button>
+                            </td>
+                        </tr>`;
+                        });
+                    } else {
+                        rows = `<tr><td colspan="6" class="text-center text-muted">No payment types found.</td></tr>`;
+                    }
+                    $('#modalPaymentTable').html(rows);
+                    // Update balance
+                    $('#modalBalanceAmount').text(`₱${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+                },
+                error: function() {
+                    $('#modalPaymentTable').html('<tr><td colspan="6" class="text-center text-danger">Error loading payment types.</td></tr>');
+                }
+            });
+        }
+
 
         $(document).on('click', '#confirmPayBtn', function(e) {
             var studentId = $('#modalStudentId').text();
@@ -573,15 +629,24 @@ include "../conn.php";
                             date_paid: datePaid
                         },
                         success: function(response) {
-                            $('#payModal').modal('hide');
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Payment Successful!',
                                 text: 'The payment has been saved.',
                                 confirmButtonColor: '#3085d6'
-                            }).then(() => {
-                                location.reload();
                             });
+                            // Clear the pay modal fields
+                            $('#payAmount').val('');
+                            $('#payDescription').val('');
+                            $('#payDate').val('');
+                            // Hide only the pay modal
+                            $('#payModal').modal('hide');
+                            // Reload payment info in the student modal
+                            const studentId = $('#modalStudentId').text().trim();
+                            const gradeSection = $('#modalGradeSection').text().split('-')[1] || '';
+                            const grade = gradeSection.split('|')[0]?.trim() || '';
+                            const section = gradeSection.split('|')[1]?.trim() || '';
+                            reloadStudentPaymentInfo(studentId, grade, section);
                         },
                         error: function() {
                             Swal.fire('Error', 'Error saving payment.', 'error');
@@ -603,6 +668,8 @@ include "../conn.php";
             }
         });
     </script>
+
+
 
 
     <script>
