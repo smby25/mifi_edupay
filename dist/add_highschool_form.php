@@ -149,8 +149,8 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">ESC Status <span class="text-danger">*</span></label>
-                        <select class="form-select" name="esc_stat" required>
+                        <label class="form-label">ESC Status</label>
+                        <select class="form-select" name="esc_stat">
                             <option value="" disabled selected>Select</option>
                             <option value="ESC">ESC</option>
                             <option value="NON-ESC">NON-ESC</option>
