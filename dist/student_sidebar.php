@@ -425,49 +425,48 @@ include "../conn.php";
             // Existing view-student-btn code...
 
             // Delete button handler
-            $('.delete-student-btn').on('click', function() {
-                var studentId = $(this).data('id');
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "This will move the student record to archive.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Yes, archive it!',
-                    reverseButtons: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // AJAX request to delete
-                        $.ajax({
-                            url: 'php_functions/delete_student.php',
-                            type: 'POST',
-                            data: {
-                                student_id: studentId
-                            },
-                            success: function(response) {
-                                // Optionally, check response for success
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Deleted!',
-                                    text: 'Student record has been deleted.',
-                                    confirmButtonColor: '#3085d6'
-                                }).then(() => {
-                                    location.reload(); // Refresh page or remove row from table
-                                });
-                            },
-                            error: function() {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error!',
-                                    text: 'Failed to delete student record.',
-                                    confirmButtonColor: '#3085d6'
-                                });
-                            }
-                        });
-                    }
-                });
+            $(document).on('click', '.delete-student-btn', function() {
+            var studentId = $(this).data('id');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This will move the student record to archive.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, archive it!',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // AJAX request to delete
+                    $.ajax({
+                        url: 'php_functions/delete_student.php',
+                        type: 'POST',
+                        data: {
+                            student_id: studentId
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Deleted!',
+                                text: 'Student record has been deleted.',
+                                confirmButtonColor: '#3085d6'
+                            }).then(() => {
+                                location.reload(); // Refresh page or remove row from table
+                            });
+                        },
+                        error: function() {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: 'Failed to delete student record.',
+                                confirmButtonColor: '#3085d6'
+                            });
+                        }
+                    });
+                }
             });
+        });
         });
     </script>
 
