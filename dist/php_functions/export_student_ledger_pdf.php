@@ -132,7 +132,7 @@ if ($payments_result->num_rows === 0) {
     }
 
     // Add Grand Total Row
-    $pdf->SetFont('helvetica', 'B', 12);
+    $pdf->SetFont('arial', 'B', 12);
     $pdf->SetFillColor(200, 200, 200);
     $pdf->Cell(70, 10, 'TOTAL', 1, 0, '', 1);
     $pdf->Cell(50, 10, '₱' . number_format($total_amount_sum, 2), 1, 0, 'R', 1);
