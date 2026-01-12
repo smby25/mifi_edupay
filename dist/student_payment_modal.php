@@ -265,8 +265,27 @@
 </script>
 
 
-
 <script>
+  // document.getElementById("exportPaymentSummaryBtn").addEventListener("click", function() {
+  //   const studentId = document.getElementById("modalStudentId").textContent.trim();
+  //   if (studentId) {
+  //     window.open(`php_functions/export_student_ledger_pdf.php?student_id=${studentId}`, '_blank');
+  //   } else {
+  //     alert("Student ID is missing.");
+  //   }
+  // });
+
+    document.getElementById("exportPaymentSummaryBtn").addEventListener("click", function() {
+    const studentId = document.getElementById("modalStudentId").textContent.trim();
+    if (studentId) {
+      window.open(`php_functions/export_student_ledger_pdf2.php?student_id=${studentId}`, '_blank');
+    } else {
+      alert("Student ID is missing.");
+    }
+  });
+</script>
+
+<!-- <script>
   document.getElementById("exportPaymentSummaryBtn").addEventListener("click", function() {
     const studentId = document.getElementById("modalStudentId").textContent.trim();
     if (studentId) {
@@ -280,4 +299,4 @@
       alert("Student ID is missing.");
     }
   });
-</script>
+</script> -->
